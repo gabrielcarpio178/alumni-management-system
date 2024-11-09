@@ -52,7 +52,6 @@
 import axios from 'axios';
 import Swal from 'sweetalert2'
 
-const PORT = "http://localhost:8080/auth";
 export default  {
     methods: {
         closemodal(){
@@ -80,7 +79,7 @@ export default  {
                         status: status
                     }
 
-                    await axios.put(`${PORT}/admin/user_statsUpdate`,
+                    await axios.put(`${this.PORT}/auth/admin/user_statsUpdate`,
                         updateData,
                         {
                             headers:{

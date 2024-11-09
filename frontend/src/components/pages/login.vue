@@ -1,7 +1,9 @@
 <template>
     <div class="bg-gray-50 dark:bg-gray-900 flex flex-col gap-10 w-full overflow-x-hidden">
         <Topbar/>
+        <Loader v-bind:isLoader='isLoader'/>
         <section class="bg-gray-50 dark:bg-gray-900 h-[100vh]">
+            
             <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto mt-5 md:h-screen lg:py-0">
                 <div class="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700  animate__animated animate__fadeIn">
                     <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
@@ -31,7 +33,7 @@
                 </div>
             </div>
         </section>
-        <Bottombar/>
+        <!-- <Bottombar/> -->
     </div>
 </template>
 
@@ -39,38 +41,73 @@
     import axios from 'axios';
     import Topbar from '../layout/header.vue'
     import Bottombar from '../layout/footer.vue'
-
-    const PORT = "http://localhost:8080";
+    import Loader from '../layout/loader.vue'
+    import Swal from 'sweetalert2';
+        
     export default {
         name: 'login',
         components: {
             Topbar,
-            Bottombar
+            Bottombar,
+            Loader
+        },
+        data(){
+            return {
+                isLoader : 'loader-hide'
+            }
         },
         methods: {
             async loginSubmit(e){
                 e.preventDefault();
+                this.isLoader = 'loader-display';
                 const sendData = {
                     email: this.email,
                     password: this.password
                 }
                 try {
-                const res = await axios.post(`${PORT}/auth/login`,sendData);
+                const res = await axios.post(`${this.PORT}/auth/login`,sendData);
                     if(res.status===200){
-                        localStorage.setItem('token', res.data.token);
-                        localStorage.setItem('role', res.data.role);
-                        localStorage.setItem('isLogin', true);
-                        if(res.data.role==='admin'){
-                            window.location = "/admin-home"
-                        }else if(res.data.role==="student"){
-                            window.location = "/student-home"
+                        if(res.data.message!=='deactived account'){
+                            localStorage.setItem('token', res.data.token);
+                            localStorage.setItem('role', res.data.role);
+                            if(res.data.role==='admin'){
+                                window.location = "/admin-home"
+                            }else if(res.data.role==="student"){
+                                localStorage.setItem('student', JSON.stringify(res.data.student))
+                                window.location = "/"
+                            }
+                        }else{
+                             Swal.fire({
+                                position: "center",
+                                title: `Warning`,
+                                text: `Wait for admin to activate your account.`,
+                                showConfirmButton: false,
+                                timer: 1000,
+                                icon: "warning"
+                            });
                         }
                         
                     }else{
-                        document.getElementById("message").textContent = 'Wrong password or email'
+                        Swal.fire({
+                            position: "center",
+                            title: `Invalid`,
+                            text: `Wrong password and email.`,
+                            showConfirmButton: false,
+                            timer: 1000,
+                            icon: "error"
+                        });
                     }        
                 } catch (error){
-                        document.getElementById("message").textContent = 'Wrong password or email'
+                        Swal.fire({
+                            position: "center",
+                            title: `Invalid`,
+                            text: `Wrong password and email.`,
+                            showConfirmButton: false,
+                            timer: 1000,
+                            icon: "error"
+                        });
+                } finally{
+                    this.isLoader = 'loader-hide'
                 }
             }
         }

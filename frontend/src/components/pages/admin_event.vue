@@ -19,7 +19,7 @@
                             <div class="block mb-2 text-sm font-medium text-gray-900 dark:text-white capitalize">Banner</div>
                             <div class="rounded-md h-40 bg-white">
                                 <div class="h-full flex items-center justify-center text-2xl font-bold">
-                                    <img :src="this.port+event.banner" class="max-w-full max-h-full w-full h-full rounded-md"/>
+                                    <img :src="this.PORT+'/uploads/'+event.banner" class="max-w-full max-h-full w-full h-full rounded-md"/>
                                 </div>     
                             </div>
                             <div>
@@ -58,8 +58,6 @@ import ModalAdd from './admin_modalAdd_event.vue'
 import moment from 'moment'
 import Swal from 'sweetalert2'
 
-const PORT = "http://localhost:8080/auth";
-
 export default {
    components: {
         Adminheader,
@@ -69,7 +67,6 @@ export default {
     data(){
         return{
             events : [],
-            port: 'http://localhost:8080/uploads/',
             message: ""
         }
     },
@@ -82,7 +79,7 @@ export default {
         },
         async getGallery(filter){
             const token = localStorage.getItem('token');
-            const res = await axios.get(`${PORT}/admin/event/${filter}`, {
+            const res = await axios.get(`${this.PORT}/auth/admin/event/${filter}`, {
                  headers: {
                     authorization : `bear ${localStorage.getItem('token')}`
                 }
@@ -117,7 +114,7 @@ export default {
                 confirmButtonText: "Yes, delete it!"
             }).then(async (result) => {
             if (result.isConfirmed) { 
-                await axios.delete(`${PORT}/admin/deleteEvent`,
+                await axios.delete(`${this.PORT}/auth/admin/deleteEvent`,
                     {
                         headers:{
                             'Content-type':'application/x-www-form-urlencoded',

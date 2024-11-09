@@ -13,7 +13,7 @@
                         <div class="rounded-lg border bg-white dark:bg-gray-800 dark:border-gray-700 px-4 py-5 shadow-lg">
                             <div class="rounded-md h-40 bg-white">
                                 <div class="h-full flex items-center justify-center text-2xl font-bold">
-                                        <img :src="this.port+data.image" class="max-w-full max-h-full w-full h-full rounded-md"/>
+                                        <img :src="this.PORT+'/uploads/'+data.image" class="max-w-full max-h-full w-full h-full rounded-md"/>
                                     </div>     
                                 </div>
                             <div>
@@ -46,7 +46,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2'
 import moment from 'moment'
 
-const PORT = "http://localhost:8080/auth";
+// const PORT = "http://localhost:8080/auth";
 
 export default {
     components: {
@@ -58,7 +58,6 @@ export default {
     data(){
         return{
             gallery : [],
-            port: 'http://localhost:8080/uploads/',
             gallery_data: {}
         }
     },
@@ -70,12 +69,7 @@ export default {
             return moment(date).format('MMM D, YYYY');
         },
         async getGallery(){
-            const token = localStorage.getItem('token');
-            const res = await axios.get(`${PORT}/admin/gallery`, {
-                 headers: {
-                    authorization : `bear ${localStorage.getItem('token')}`
-                }
-            })
+            const res = await axios.get(`${this.PORT}/auth/admin/gallery`)
             this.gallery = res.data.rows;
         },
         async delateGallery(id){
@@ -90,7 +84,7 @@ export default {
                 confirmButtonText: "Yes, delete it!"
             }).then(async (result) => {
             if (result.isConfirmed) { 
-                await axios.delete(`${PORT}/admin/deleteGallery`,
+                await axios.delete(`${this.PORT}/auth/admin/deleteGallery`,
                     {
                         headers:{
                             'Content-type':'application/x-www-form-urlencoded',

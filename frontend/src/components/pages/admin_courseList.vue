@@ -90,7 +90,6 @@ import Navbar from './../layout/admin_navbar.vue'
 import axios from 'axios';
 import Swal from 'sweetalert2'
 
-const PORT = "http://localhost:8080";
 export default {
     components: {
         Adminheader,
@@ -114,7 +113,7 @@ export default {
             const token = localStorage.getItem('token');
             const course = this.course;
             
-            const res = await axios.post(`${PORT}/auth/admin/addCourse`,
+            const res = await axios.post(`${this.PORT}/auth/admin/addCourse`,
                 {
                     course: course.toUpperCase(),
                 },
@@ -144,7 +143,7 @@ export default {
         
         async displayCourse(search){
             try{
-                const res = await axios.get(`${PORT}/auth/course/${search}`);
+                const res = await axios.get(`${this.PORT}/auth/course/${search}`);
                 if(res.data.message==='not found'){
                     this.not_found = res.data.message;
                     document.getElementById("table_content").style.display="none"
@@ -169,7 +168,7 @@ export default {
                 confirmButtonText: "Yes, delete it!"
             }).then(async (result) => {
             if (result.isConfirmed) { 
-                await axios.delete(`${PORT}/auth/admin/deleteCourse`,
+                await axios.delete(`${this.PORT}/auth/admin/deleteCourse`,
                     {
                         headers:{
                             'Content-type':'application/x-www-form-urlencoded',

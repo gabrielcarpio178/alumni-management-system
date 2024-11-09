@@ -42,7 +42,7 @@
                                 </tr>
                             </thead>
                              <tbody >
-                                <p class="capitalize text-red-700 pl-5 font-bold">{{message}}</p>  
+                                  
                                 <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 uppercase cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" v-for="(data, index) in this.datas" :key="index" @click="viewuser(index)">
                                     <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white text-center">
                                             {{data.firstname + " " + data.lastname}}
@@ -60,11 +60,12 @@
                                             {{data.student_id}}
                                     </td>
                                     <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white text-center">
-                                            {{data.status==0?"deactive":"active"}}
+                                            {{data.status==0?"deactivate":"activate"}}
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
+                        <p class="capitalize text-red-700 pl-5 font-bold">{{message}}</p>
                     </div>
                     <Modal class="hidden animate__animated animate__bounceInDown" id="modal_content" v-bind:alumni_data='alumni_data'/>
                 </div>
@@ -79,8 +80,6 @@ import Navbar from './../layout/admin_navbar.vue'
 import Modal from './admin_modal_profile.vue'
 import axios from 'axios';
 import moment from 'moment'
-
-const PORT = "http://localhost:8080/auth";
 
 export default {
     components: {
@@ -100,14 +99,14 @@ export default {
         this.getdata('all');
     },
     methods: {
-        moment: function (date) {
+        moment(date) {
             return moment(date).format('MMM D, YYYY');
         },
         async getdata(search){
             if(search==''){
                 search = 'all';
             }
-            const res = await axios.get(`${PORT}/admin/alumnilist/${search}`,{
+            const res = await axios.get(`${this.PORT}/auth/admin/alumnilist/${search}`,{
                 headers: {
                     authorization : `bear ${localStorage.getItem('token')}`
                 }

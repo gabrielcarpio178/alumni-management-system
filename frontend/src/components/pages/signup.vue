@@ -80,7 +80,7 @@
                 </div>
             </div>
         </section>
-        <Bottombar/>
+        <!-- <Bottombar/> -->
     </div>    
 </template>
 
@@ -90,7 +90,7 @@
     import Bottombar from '../layout/footer.vue'
     import moment from 'moment';
 
-    const PORT = "http://localhost:8080";
+    // const PORT = "http://localhost:8080";
   
     export default {
         name: 'signup',
@@ -119,7 +119,7 @@
             },
             async getcourse(){
                 try{
-                    const res = await axios.get(`${PORT}/auth/course/all`);
+                    const res = await axios.get(`${this.PORT}/auth/course/all`);
                     this.datas = res.data.rows;
                 }catch(error){
                     console.log(error);
@@ -142,7 +142,7 @@
                         password: this.password,
                     }
                     try {
-                        const res = await axios.post(`${PORT}/auth/register`,sendData);
+                        const res = await axios.post(`${this.PORT}/auth/register`,sendData);
                         if(res.status===201){
                             if(res.data.message==="user created successfully"){
                                 window.location = "/login"

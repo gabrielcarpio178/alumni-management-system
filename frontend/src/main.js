@@ -6,6 +6,7 @@ import App from './App.vue'
 import { createRouter, createWebHistory } from 'vue-router';
 import login from './components/pages/login.vue'
 import home from './components/pages/home.vue'
+import gallery from './components/pages/gallery.vue'
 import sign from './components/pages/signup.vue'
 import admin_home from './components/pages/admin_home.vue'
 import course_list from './components/pages/admin_courseList.vue'
@@ -13,6 +14,7 @@ import alumni_list from './components/pages/admin_alumniList.vue'
 import alumni_gallery from './components/pages/admin_gallery.vue'
 import event_admin from './components/pages/admin_event.vue'
 import account_setting from './components/pages/admin_accountSetting.vue'
+import profile from './components/pages/profile_edit.vue'
 
 
 
@@ -22,6 +24,11 @@ const router = createRouter({
             path: "/",
             name: 'home',
             component: home
+        },
+        {
+            path: "/gallery",
+            name: 'gallery',
+            component: gallery
         },
         {
             path: "/login", 
@@ -35,7 +42,7 @@ const router = createRouter({
         },
         {
             path: "/admin-home", 
-            name: "admin-homepage",
+            name: "admin-home",
             component: admin_home,
             meta: {
                 requiresAuth: true,
@@ -81,12 +88,26 @@ const router = createRouter({
                 requiresAuth: true,
             }
         },
+        {
+            path: "/profile", 
+            name: "profile",
+            component: profile,
+            meta: {
+                requiresAuth: true,
+            }
+        },
     ],
     history: createWebHistory()
 })
 
 router.beforeEach(async (to, from, next) => {
-    if(localStorage.getItem('isLogin')){
+    const admin_page = ['admin-home', 'course-list', 'alumni-list', 'alumni-gallery', 'event', 'account-setting'];
+    
+    if(localStorage.getItem('role')==='admin'&&admin_page.includes(to.name)){
+        to.meta.requiresAuth = false;
+    }
+
+    if(localStorage.getItem('role')==='student'&&!admin_page.includes(to.name)){
         to.meta.requiresAuth = false;
     }
     
@@ -97,4 +118,15 @@ router.beforeEach(async (to, from, next) => {
     }
 });
 
-createApp(App).use(router).mount('#app')
+const globalVariable = {
+    data(){
+        return {
+            PORT: 'http://localhost:8080',
+            isLogin: localStorage.getItem('token')!==null
+        }
+    }
+}
+
+const app = createApp(App);
+app.mixin(globalVariable);
+app.use(router).mount('#app')

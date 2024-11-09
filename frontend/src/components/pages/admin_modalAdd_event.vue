@@ -50,7 +50,7 @@
 import axios from 'axios';
 import Swal from 'sweetalert2'
 
-const PORT = "http://localhost:8080/auth";
+// const PORT = "http://localhost:8080/auth";
 export default  {
     data() {
         return {
@@ -94,7 +94,7 @@ export default  {
             formData.append('description', this.description);
             formData.append('address', this.address);
             formData.append('file', this.file);
-             const res = await axios.post(`${PORT}/admin/event`,
+             const res = await axios.post(`${this.PORT}/auth/admin/event`,
                 formData, 
                 {
                 headers:{

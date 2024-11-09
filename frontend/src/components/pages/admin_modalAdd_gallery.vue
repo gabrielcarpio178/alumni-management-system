@@ -38,13 +38,13 @@
 import axios from 'axios';
 import Swal from 'sweetalert2'
 
-const PORT = "http://localhost:8080/auth";
+// const PORT = "http://localhost:8080/auth";
 export default  {
     data() {
         return {
             file: "",
             message: "",
-            image: ""
+            image: "",
         };
     },
     methods:{
@@ -79,7 +79,7 @@ export default  {
             const formData = new FormData();
             formData.append("file", this.file);
             formData.append('caption', this.caption);
-            const res = await axios.post(`${PORT}/admin/gallery`,
+            const res = await axios.post(`${this.PORT}/auth/admin/gallery`,
                 formData, 
                 {
                 headers:{

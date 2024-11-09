@@ -39,7 +39,6 @@ import Adminheader from './../layout/admin_header.vue'
 import Navbar from './../layout/admin_navbar.vue'
 import Swal from 'sweetalert2'
 
-const PORT = "http://localhost:8080/auth";
 
 export default {
     components: {
@@ -58,7 +57,7 @@ export default {
     methods: {
         async getAdminData(){
             const token = localStorage.getItem('token');
-            const res = await axios.get(`${PORT}/admin/account`, {
+            const res = await axios.get(`${this.PORT}/auth/admin/account`, {
                  headers: {
                     authorization : `bear ${token}`
                 }
@@ -74,7 +73,7 @@ export default {
             const con_password = this.con_password;
             if(password===con_password){
                 this.message = ''
-                const res = await axios.put(`${PORT}/admin/account`,
+                const res = await axios.put(`${this.PORT}/auth/admin/account`,
                 {
                     id: this.id,
                     email: email,
