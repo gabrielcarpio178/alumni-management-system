@@ -50,12 +50,15 @@ router.post('/login', async (req, res) => {
 
     try {
         const db = await connectToDatabase();
-        const [student_rows] = await db.query(`SELECT * FROM students WHERE email = '${email}'`);
+        const [student_rows] = await db.query(`SELECT s.*, c.course FROM students AS s INNER JOIN course AS c ON s.course = c.id WHERE s.email = '${email}'`);
         if (student_rows.length > 0) {
             var isMatch = await bcrypt.compare(password, student_rows[0].password);
             if(isMatch){
-                const token = jwt.sign({ id: student_rows[0].id }, JWT_KEY, { expiresIn: '24h' });
-                return res.status(200).json({token, role: "student" });
+                if(student_rows[0].status===1){
+                    const token = jwt.sign({ id: student_rows[0].id }, JWT_KEY, { expiresIn: '24h' });
+                    return res.status(200).json({student: student_rows[0] ,token, role: "student" });
+                }
+                return res.status(200).json({message: 'deactived account'})
             }
         }
         const [rows_admin] = await db.query(`SELECT * FROM user WHERE email = '${email}'`);
@@ -72,6 +75,7 @@ router.post('/login', async (req, res) => {
         return res.status(500).json(error.message)
     }
 });
+
 
 router.get('/course/:search', async (req, res)=>{
     const search = req.params.search;
@@ -108,21 +112,18 @@ const verifyToken = async (req, res, next) => {
     }
 }
 
-
-router.get('/student/home', verifyToken, async (req, res)=>{
-    const id = req.userId;
+router.get('/student/:id', verifyToken, async (req, res)=>{
+    const id = req.params.id;
     try {
         const db = await connectToDatabase();
-        const [rows] = await db.query(`SELECT * FROM students WHERE id = '${id}'`);
-        if(rows.length !== 0){
-            return res.status(200).json({rows});
-        }
-        return res.status(404).json({message: "not found"});
+        const [student] = await db.query(`SELECT * FROM students WHERE id = ${id}`)
+        return res.status(200).json({student});
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({message: "server error"})
+        return res.status(500).json(error.message)
     }
-});
+})
+
+
 
 router.post('/admin/addCourse', verifyToken, async (req, res)=>{
     const course = req.body.course;
@@ -241,7 +242,7 @@ router.post('/admin/gallery', verifyToken ,upload.single("file"), async (req, re
 });
 
 
-router.get('/admin/gallery', verifyToken, async (req, res)=>{
+router.get('/admin/gallery', async (req, res)=>{
     try {
         const db = await connectToDatabase();
         const [rows] = await db.query(`SELECT id, caption, image, date_upload FROM gallery ORDER BY id DESC`);
@@ -334,6 +335,16 @@ router.put('/admin/account', verifyToken, async (req, res)=>{
         const hashPassword = await bcrypt.hash(password, 10)
         await db.query(`UPDATE user SET email='${email}',password='${hashPassword}' WHERE id = '${id}'`);
         return res.status(200).json({message: 'update success'});
+    } catch (error) {
+        return res.status(500).json({message: 'server error'});
+    }
+})
+
+router.get('/events', async (req, res)=>{
+    try {
+        const db = await connectToDatabase();
+        const [rows] = await db.query('SELECT * FROM event');
+        return res.status(200).json({rows});
     } catch (error) {
         return res.status(500).json({message: 'server error'});
     }
