@@ -50,7 +50,7 @@ router.post('/login', async (req, res) => {
 
     try {
         const db = await connectToDatabase();
-        const [student_rows] = await db.query(`SELECT s.*, c.course FROM students AS s INNER JOIN course AS c ON s.course = c.id WHERE s.email = '${email}'`);
+        const [student_rows] = await db.query(`SELECT s.*, c.course AS course_name FROM students AS s INNER JOIN course AS c ON s.course = c.id WHERE s.email = '${email}'`);
         if (student_rows.length > 0) {
             var isMatch = await bcrypt.compare(password, student_rows[0].password);
             if(isMatch){
@@ -111,6 +111,11 @@ const verifyToken = async (req, res, next) => {
         return res.status(500).json({message: "server error"})
     }
 }
+
+router.put('/profile/update', verifyToken, async (req, res)=>{
+    console.log(req.body);
+    console.log(req.body.file);
+})
 
 router.get('/student/:id', verifyToken, async (req, res)=>{
     const id = req.params.id;

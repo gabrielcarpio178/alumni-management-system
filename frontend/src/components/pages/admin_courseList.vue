@@ -196,7 +196,7 @@ export default {
             const course = this.edit_course
             const id = this.id;
             const token = localStorage.getItem('token');
-            const res = await axios.put(`${PORT}/auth/admin/editCourse`,
+            const res = await axios.put(`${this.PORT}/auth/admin/editCourse`,
                 {
                     course: course.toUpperCase(),
                     id: id

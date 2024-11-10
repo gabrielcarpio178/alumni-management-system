@@ -9,7 +9,7 @@
             </div>
             <div class="rounded-lg border bg-white dark:bg-gray-800 dark:border-gray-700 px-4 py-5 shadow-lg">
                 <div class="relative mx-auto w-36 rounded-full">
-                    <img class="mx-auto h-auto w-full rounded-full" :src="student.profile_pic===null?getThumbnel(student.firstname, student.lastname):`${this.PORT}/uploads/${stundet.profile_pic}`" alt="" />
+                    <img class="mx-auto h-auto w-full rounded-full" :src="student.profile_pic===null?getThumbnel(student.firstname, student.lastname):`${this.PORT}/uploads/${student.profile_pic}`" alt="" />
                     
                 </div>
                 <h1 class="my-1 text-center text-xl font-bold leading-8 text-white capitalize">{{`${student.firstname} ${student.middlename} ${student.lastname}`}}</h1>
@@ -28,7 +28,7 @@
                     </li>
                     <li class="flex items-center py-3 text-sm">
                         <span>Course</span>
-                        <span class="ml-auto">{{student.course}}</span>
+                        <span class="ml-auto">{{student.course_name}}</span>
                     </li>
                     <li class="flex items-center py-3 text-sm">
                         <span>Batch</span>

@@ -94,7 +94,7 @@ export default  {
             formData.append('description', this.description);
             formData.append('address', this.address);
             formData.append('file', this.file);
-             const res = await axios.post(`${this.PORT}/auth/admin/event`,
+            const res = await axios.post(`${this.PORT}/auth/admin/event`,
                 formData, 
                 {
                 headers:{
