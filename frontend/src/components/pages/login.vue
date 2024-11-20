@@ -2,8 +2,7 @@
     <div class="bg-gray-50 dark:bg-gray-900 flex flex-col gap-10 w-full overflow-x-hidden">
         <Topbar/>
         <Loader v-bind:isLoader='isLoader'/>
-        <section class="bg-gray-50 dark:bg-gray-900 h-[100vh]">
-            
+        <section class="bg-gray-50 dark:bg-gray-900 h-[100vh] md:mt-0 mt-20">
             <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto mt-5 md:h-screen lg:py-0">
                 <div class="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700  animate__animated animate__fadeIn">
                     <div class="p-6 space-y-4 md:space-y-6 sm:p-8">

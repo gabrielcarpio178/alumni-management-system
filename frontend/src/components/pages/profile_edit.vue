@@ -1,11 +1,11 @@
 <template>
     <div class="bg-gray-50 dark:bg-gray-900 flex flex-col gap-10 w-full overflow-x-hidden">
+        <Loader v-bind:isLoader='isLoader'/>
         <Topbar/>
         <div class="h-screen xl:h-full text-white w-screen animate__animated animate__fadeIn">
             <section class="py-20 my-auto dark:bg-gray-900">
-                <div class="lg:w-[80%] md:w-[90%] xs:w-[96%] mx-auto flex gap-4">
-                    <div class="lg:w-[88%] md:w-[80%] sm:w-[88%] xs:w-full mx-auto shadow-2xl p-4 rounded-xl h-fit self-center dark:bg-gray-800/40">
-                        <!--  -->
+                <div class="lg:w-[80%] md:w-[90%] xs:w-[96%] mx-auto w-full flex gap-4">
+                    <div class="lg:w-[88%] md:w-[80%] sm:w-[88%] xs:w-full mx-auto shadow-2xl p-4 rounded-xl h-fit w-3/4 self-center dark:bg-gray-800/40">
                         <div class="">
                             <h1 class="lg:text-3xl md:text-2xl sm:text-xl xs:text-xl font-serif font-extrabold mb-2 dark:text-white">
                                 Profile
@@ -14,13 +14,14 @@
 
                             <form class="w-full" enctype="multipart/form-data" @submit="editSave">
                                <div class="flex justify-center">
-                                    <div class="w-36 h-36" onclick="document.getElementById('upload_img').click()">
-                                        <img  v-if="this.image!==''" :src="image" alt="profile" class="min-w-full  rounded-full">
-                                        <img v-else :src="student.profile_pic===null?getThumbnel(student.firstname, student.lastname):`${this.PORT}/uploads/${student.profile_pic}`" alt="profile" class="min-w-full  rounded-full">
+                                    <div class="w-36 h-36 rounded-full cursor-pointer hover:scale-110 transition-all relative" onclick="document.getElementById('upload_img').click()">
+                                        <img  v-if="this.image!==''" :src="image" alt="profile" class="w-36 h-36 object-center rounded-full">
+                                        <img v-else :src="student.profile_pic===null?getThumbnel(student.firstname, student.lastname):`${this.PORT}/uploads/${student.profile_pic}`" alt="profile" class="w-36 h-36 object-center rounded-full">
+
                                     </div>
                                     <input type="file" ref="file" class="hidden" id="upload_img" @change="onSelect">
                                </div>
-                               <div class="grid grid-cols-3 gap-5">
+                               <div class="grid md:grid-cols-3 gap-5">
                                     <div class="flex flex-col w-full">
                                         <label for="firstname" class="capitalize block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                             firstname
@@ -117,9 +118,13 @@
     import Topbar from '../layout/header.vue'
     import moment from 'moment';
     import axios from 'axios';
+    import Loader from '../layout/loader.vue'
+    import Swal from 'sweetalert2';
+    
     export default{
         components: { 
-            Topbar 
+            Topbar,
+            Loader 
         },
         data(){
             return {
@@ -127,7 +132,8 @@
                 years : [],
                 image : '',
                 file: "",
-                datas: []
+                datas: [],
+                isLoader : 'loader-hide'
             }
         },
         mounted(){
@@ -183,25 +189,25 @@
 
             async editSave(e){
                 e.preventDefault();
+                this.isLoader = 'loader-display';
                 const token = localStorage.getItem('token');
-                
-                const res = await axios.put(`${this.PORT}/auth/profile/update`,
-                    {
-                        file: this.file,
-                        firstname: this.student.firstname,
-                        middlename: this.student.middlename,
-                        lastname: this.student.lastname,
-                        gender: this.student.gender,
-                        birthday: this.student.birthday,
-                        contact_num: this.student.contact_num,
-                        course: this.student.course,
-                        batch: this.student.batch,
-                        student_id: this.student.student_id,
-                        email: this.student.email,
-                        old_password: this.student.old_password,
-                        password: this.student.password,
-                        id: JSON.parse(localStorage.getItem('student')).id
-                    },
+                const formData = new FormData();
+                formData.append('file', this.file);    
+                formData.append('firstname', this.student.firstname);    
+                formData.append('middlename', this.student.middlename);    
+                formData.append('lastname', this.student.lastname);    
+                formData.append('gender', this.student.gender);    
+                formData.append('birthday', this.student.birthday);    
+                formData.append('contact_num', this.student.contact_num);    
+                formData.append('course', this.student.course);    
+                formData.append('batch', this.student.batch);    
+                formData.append('student_id', this.student.student_id);    
+                formData.append('id', JSON.parse(localStorage.getItem('student')).id);    
+                formData.append('email', this.student.email);    
+                formData.append('old_password', this.old_password);    
+                formData.append('new_password', this.password);    
+                const res = await axios.post(`${this.PORT}/auth/profile/update`,
+                    formData,
                     {
                         headers:{
                             'Content-type':'application/x-www-form-urlencoded',
@@ -209,6 +215,32 @@
                         }
                     }
                 );
+                if(res.data.message == 'already use contacts'||res.data.message == 'old password not match'){
+                    this.isLoader = 'loader-hide'
+                    Swal.fire({
+                        position: "center",
+                        title: `Warning`,
+                        text: `${res.data.message}.`,
+                        showConfirmButton: false,
+                        timer: 1000,
+                        icon: "warning"
+                    });
+                }else{
+                    this.isLoader = 'loader-hide'
+                    Swal.fire({
+                        position: "center",
+                        title: `Success`,
+                        text: `Edit successfully`,
+                        showConfirmButton: false,
+                        timer: 1000,
+                        icon: "success"
+                    }).then(()=>{
+                        res.data.rows.birthday = moment(res.data.rows.birthday).format('yyyy-MM-DD');
+                        localStorage.setItem('student', JSON.stringify(res.data.rows))
+                        window.location = '/profile';
+                    });
+                    
+                }
 
             }
 

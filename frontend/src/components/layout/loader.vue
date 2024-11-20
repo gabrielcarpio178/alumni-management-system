@@ -13,7 +13,6 @@
 </template>
 
 <script>
-
 export default {
     props: ['isLoader']
 }
@@ -30,10 +29,11 @@ export default {
     }
     .main-loader{
         background-color: rgba(255, 255, 255, 0.5);
-        position: absolute;      
+        position: fixed;      
         z-index: 1000000;
         width: 100%;
         height: 100vh;
+        overflow: hidden;
     }
     .loader{
         display: grid;

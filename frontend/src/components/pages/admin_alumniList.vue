@@ -1,23 +1,22 @@
 <template>
     <div class="bg-gray-50 dark:bg-gray-900 w-screen overflow-x-hidden flex flex-row">
         <Adminheader/>
+        <Loader v-bind:isLoader='isLoader'/>
         <div class="flex flex-col w-full">
             <Navbar/>
-            <div class="w-full mt-[5%] ml-[20.5%] text-white animate__animated animate__fadeIn pl-4">
+            <div class="w-full mt-14 md:mt-[5%] md:ml-[20.5%] text-white animate__animated animate__fadeIn pl-4">
                 <h1 class="text-3xl pb-4 tracking-tight text-gray-900 dark:text-white  font-bold">Alumni List</h1>
-                <div class="flex flex-col gap-y-3">
+                <div class="flex w-full flex-col gap-y-3">
                     <div class="flex gap-x-40">
-                        <div class="flex gap-x-3 bg-white shadow dark:border dark:bg-gray-800 dark:border-gray-700 p-6 rounded-md">
-                            <div>
+                        <div class="flex gap-x-3 bg-white shadow md:w-1/4 w-[97%] dark:border dark:bg-gray-800 dark:border-gray-700 p-6 rounded-md">
+                            <div class="w-full">
                                 <label for="search" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white capitalize">Search</label>
                                 <input type="text" name="search" id="search" placeholder="Search" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 capitalize" v-model="search" @input="getdata(this.search)">
                             </div>
                         </div>  
                     </div>
 
-                    
-
-                    <div class="w-[78.5%] h-80 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 overflow-y-scroll" id="table_content">
+                    <div class="w-[97%] md:w-[78.5%] h-80 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 overflow-y-scroll" id="table_content">
                         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
@@ -67,7 +66,7 @@
                         </table>
                         <p class="capitalize text-red-700 pl-5 font-bold">{{message}}</p>
                     </div>
-                    <Modal class="hidden animate__animated animate__bounceInDown" id="modal_content" v-bind:alumni_data='alumni_data'/>
+                    <Modal @loader='nowLoading' @getData="getData('')" class="hidden animate__animated animate__bounceInDown" id="modal_content" v-bind:alumni_data='alumni_data'/>
                 </div>
             </div>            
         </div>    
@@ -78,6 +77,7 @@
 import Adminheader from './../layout/admin_header.vue'
 import Navbar from './../layout/admin_navbar.vue'
 import Modal from './admin_modal_profile.vue'
+import Loader from '../layout/loader.vue'
 import axios from 'axios';
 import moment from 'moment'
 
@@ -85,13 +85,15 @@ export default {
     components: {
         Adminheader,
         Navbar,
-        Modal
+        Modal,
+        Loader
     },
     data(){
         return{
             datas: [],
             alumni_data: {},
             search : '',
+            isLoader : 'loader-hide',
             message: ''
         }
     },
@@ -99,6 +101,13 @@ export default {
         this.getdata('all');
     },
     methods: {
+        nowLoading(){
+            if(this.isLoader==='loader-hide'){
+                this.isLoader = 'loader-display';
+            }else{
+                this.isLoader = 'loader-hide'
+            }
+        },
         moment(date) {
             return moment(date).format('MMM D, YYYY');
         },

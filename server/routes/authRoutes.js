@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import multer from 'multer'
 import { unlink } from 'node:fs';
+import e from 'express'
 
 const router = express.Router();
 const JWT_KEY = "alumniItech"
@@ -112,10 +113,7 @@ const verifyToken = async (req, res, next) => {
     }
 }
 
-router.put('/profile/update', verifyToken, async (req, res)=>{
-    console.log(req.body);
-    console.log(req.body.file);
-})
+
 
 router.get('/student/:id', verifyToken, async (req, res)=>{
     const id = req.params.id;
@@ -234,6 +232,167 @@ const storage = multer.diskStorage({
 
 const upload = multer({storage: storage});
 
+router.post('/profile/update', verifyToken, upload.single("file"), async (req, res)=>{
+    const {firstname, middlename, lastname, gender, birthday, contact_num, course, batch, student_id, id, email, old_password, new_password} = req.body;
+    
+
+    try {
+
+        const db = await connectToDatabase();
+        const [data] = await db.query(`SELECT * FROM students WHERE id = ${id}`)
+        const file = req.file === undefined?data[0].profile_pic===null?data[0].profile_pic:`'${data[0].profile_pic}'`:`'${req.file.filename}'`;
+
+        const [user_obj] = await db.query(`SELECT student_id, contact_num ,email FROM students WHERE email != '${data[0].email}' OR contact_num != '${data[0].contact_num}' OR student_id != ${data[0].student_id}`);
+
+        let contact_nums = [];
+        let student_ids = [];
+        let emails = [];
+        user_obj.forEach(element => {
+            contact_nums.push(element.contact_num)
+            student_ids.push(element.student_id)
+            emails.push(element.email);
+        });
+
+        if(contact_nums.includes(contact_num)||student_ids.includes(student_id)||emails.includes(email)){
+            return res.status(200).json({message: 'already use contacts'})
+        }
+
+        var isMatch = await bcrypt.compare(old_password, data[0].password);
+        if(!isMatch){
+            return res.status(200).json({message: 'old password not match'});
+        }
+        if(data[0].profile_pic !== null&&req.file !== undefined){
+            unlink(`uploads/${data[0].profile_pic}`, (err) => {
+                if (err) throw err;
+                // console.log(`uploads/${data[0].profile_pic} was deleted`);
+            });
+        }
+
+        const hashPassword = await bcrypt.hash(new_password, 10);
+        await db.query(`UPDATE students SET firstname='${firstname}',middlename='${middlename}',lastname='${lastname}',gender='${gender}',birthday='${birthday}',course='${course}',batch='${batch}',contact_num='${contact_num}',profile_pic=${file},student_id='${student_id}',email='${email}',password='${hashPassword}' WHERE id = '${id}'`);
+        const [student] = await db.query(`SELECT s.*, c.course AS course_name FROM students AS s INNER JOIN course AS c ON s.course = c.id WHERE s.id = ${id}`);
+        
+        return res.status(200).json({rows : student[0]})
+    } catch (error) {
+        return res.status(500).json({message: 'server error'})
+    }
+    
+})
+
+
+router.post('/participate/alumni', verifyToken, async (req, res)=>{
+    const {student_id, event_id} = req.body
+    try {
+        const db = await connectToDatabase();
+
+        const [rows] = await db.query(`SELECT p.student_id FROM participant AS p INNER JOIN students AS s ON p.student_id = s.id INNER JOIN course AS c ON s.course = c.id WHERE p.event_id = ${event_id};`);
+        let student_ids = []
+        rows.map(row=>{
+            student_ids.push(row.student_id)
+        })
+
+        if(student_ids.includes(parseInt(student_id))){
+            return res.status(200).json({message: 'you already participate'})
+        }
+        db.query(`INSERT INTO participant(event_id, student_id) VALUES ('${event_id}','${student_id}')`);
+        return res.status(200).json({message: 'participate success'});
+    } catch (error) {
+        return res.status(500).json({message: 'server error'})
+    }
+})
+
+router.get('/participants/:id', verifyToken, async (req, res)=>{
+    const id = req.params.id;
+    try {
+        const db = await connectToDatabase();
+        const [rows] = await db.query(`SELECT s.firstname, s.lastname, s.id, c.course, s.batch, s.profile_pic, p.event_id FROM participant AS p INNER JOIN students AS s ON p.student_id = s.id INNER JOIN course AS c ON s.course = c.id WHERE p.event_id = ${id};`);
+        return res.status(200).json({rows});
+    } catch (error) {
+        return res.status(500).json({message: 'server error'})
+    }
+})
+
+router.delete('/participate/delete', verifyToken, async (req, res)=>{
+    const {id, event_id} = req.body
+    try {
+        const db = await connectToDatabase();
+        await db.query(`DELETE FROM participant WHERE event_id = '${event_id}' AND student_id = '${id}'`);
+        return res.status(200).json({message: 'cancel success'});
+    } catch (error) {
+        return res.status(500).json({message: 'server error'});
+    }
+})
+
+
+router.post('/jobs/post', verifyToken, async (req, res)=>{
+    const {posted_user ,company, job_title, location_data, email ,description} = req.body
+    try {
+        const db = await connectToDatabase();
+        await db.query(`INSERT INTO jobs(posted_user, company_name, job_title, location, email, description) VALUES ('${posted_user}','${company}','${job_title}','${location_data}', '${email}', '${description}')`);
+        return res.status(200).json({message: 'post success'});
+    } catch (error) {
+        return res.status(500).json({message: 'server error'});
+    }
+})
+
+
+router.get('/jobs/:id', verifyToken, async (req, res)=>{
+    const id = req.params.id;
+    try {
+        const db = await connectToDatabase();
+        const [rows] = await db.query(`SELECT a.contact_num ,j.posted_user, a.profile_pic ,a.firstname, a.middlename, a.lastname, j.company_name, j.job_title, j.location, j.email, j.description, j.datepost FROM jobs AS j INNER JOIN students AS a ON j.posted_user = a.id WHERE j.posted_user != ${id} ORDER BY j.id DESC`);
+        return res.status(200).json({rows});
+    } catch (error) {
+        return res.status(500).json({message: 'server error'});
+    }
+})
+
+router.get('/jobs/:id/user', verifyToken, async (req, res)=>{
+    const id = req.params.id;
+    try {
+        const db = await connectToDatabase();
+        const [rows] = await db.query(`SELECT j.id, a.contact_num ,j.posted_user, a.profile_pic ,a.firstname, a.middlename, a.lastname, j.company_name, j.job_title, j.location, j.email, j.description, j.datepost FROM jobs AS j INNER JOIN students AS a ON j.posted_user = a.id WHERE j.posted_user = ${id} ORDER BY j.id DESC`);
+        return res.status(200).json({rows});
+    } catch (error) {
+        return res.status(500).json({message: 'server error'});
+    }
+})
+
+router.delete('/jobs/delete', verifyToken, async (req, res)=>{
+    const id = req.body.id;
+    try{
+        const db = await connectToDatabase();
+        await db.query(`DELETE FROM jobs WHERE id = ${id}`);
+        return res.status(200).json({message: 'delete success'})
+    }catch(error){
+        return res.status(500).json({message: 'server error'})
+    }
+})
+
+router.put('/job/edit', verifyToken, async (req, res)=>{
+    const {id, company_name, job_title, location, email, description} = req.body;
+    try {
+        const db = await connectToDatabase();
+        await db.query(`UPDATE jobs SET company_name='${company_name}',job_title='${job_title}',location='${location}',email='${email}',description='${description}' WHERE id = '${id}'`);
+        return res.status(200).json({message: 'update success'});
+    } catch (error) {
+        return res.status(500).json({message: 'server error'});
+    }
+})
+
+router.get('/admin/home', verifyToken, async (req, res)=>{
+    try {
+        const db = await connectToDatabase();
+        const [job_count] = await db.query('SELECT COUNT(*) AS total_count FROM jobs');
+        const [event] = await db.query('SELECT COUNT(*) AS total_event FROM event');
+        const [total_alumni] = await db.query('SELECT COUNT(*) AS total_alumni FROM students;');
+        const [graphCourse] = await db.query('SELECT c.course, COUNT(a.id) AS total_alumni FROM students AS a RIGHT JOIN course AS c ON c.id = a.course GROUP BY c.course;');
+        return res.status(200).json({job_count: job_count[0], event: event[0], total_alumni: total_alumni[0], graphCourse})
+    } catch (error) {
+        return res.status(500).json({message: 'server error'});
+    }
+});
+
 router.post('/admin/gallery', verifyToken ,upload.single("file"), async (req, res)=>{
     const caption = req.body.caption;
     const file = req.file.filename;
@@ -256,6 +415,16 @@ router.get('/admin/gallery', async (req, res)=>{
         return res.status(500).json({message: 'server error'})
     }
 });
+
+router.get('/admin/jobs', verifyToken, async (req, res)=>{
+    try {
+        const db = await connectToDatabase();
+        const [rows] = await db.query(`SELECT j.id, a.contact_num ,j.posted_user, a.profile_pic ,a.firstname, a.middlename, a.lastname, j.company_name, j.job_title, j.location, j.email, j.description, j.datepost FROM jobs AS j INNER JOIN students AS a ON j.posted_user = a.id ORDER BY j.id DESC`);
+        return res.status(200).json({rows});
+    } catch (error) {
+        return res.status(500).json({message: 'server error'});
+    }
+})
 
 router.delete('/admin/deleteGallery', verifyToken, async (req, res)=>{
     const id = req.body.id;
@@ -291,7 +460,7 @@ router.post('/admin/event', verifyToken, upload.single("file"), async (req, res)
 
 router.get('/admin/event/:filter', verifyToken, async (req, res)=>{
     const filter = req.params.filter;
-    let sql = "SELECT * FROM event ORDER BY schedule DESC"; 
+    let sql = "SELECT * FROM event ORDER BY id DESC"; 
     if(filter!=='all'){
         sql = `SELECT * FROM event WHERE CAST(schedule AS date) LIKE '${filter}' ORDER BY schedule DESC`; 
     }
@@ -327,6 +496,31 @@ router.get('/admin/account', verifyToken, async (req, res)=>{
         const [row] = await db.query('SELECT * FROM user');
         return res.status(200).json({row});
     } catch (error) {
+        return res.status(500).json({message: 'server error'})
+    }
+})
+
+
+router.get('/admin/system_setting', async (req, res)=>{
+    try {
+        const db = await connectToDatabase();
+        const [row] = await db.query('SELECT * FROM system_data');
+        return res.status(200).json({row: row[0]});
+    } catch (error) {
+        return res.status(500).json({message: 'server error'})
+    }
+})
+
+
+
+router.put('/admin/system_setting', verifyToken, async (req, res)=>{
+    req.body.contact_number = req.body.contact_number.toString();
+    const {id, system_title, about, email, contact_number} = req.body;
+    try{
+        const db = await connectToDatabase();
+        await db.query(`UPDATE system_data SET system_title='${system_title}',about='${about}',contact_number='${contact_number}',email='${email}' WHERE id = '${id}'`);
+        return res.status(200).json({message: 'update success'});
+    }catch(error){
         return res.status(500).json({message: 'server error'})
     }
 })

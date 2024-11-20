@@ -1,14 +1,15 @@
 <template>
     <div class="bg-gray-50 dark:bg-gray-900 w-screen overflow-x-hidden flex flex-row">
         <Adminheader/>
+        <Loader v-bind:isLoader='isLoader'/>
         <div class="flex flex-col w-full">
             <Navbar/>
-            <div class="w-full mt-[5%] ml-[20.5%] text-white animate__animated animate__fadeIn pl-4 px-4">
+            <div class="w-full mt-[13%] ml-[8%] md:mt-[5%] md:ml-[20.5%] text-white animate__animated animate__fadeIn md:pl-4 md:px-4">
                 <h1 class="text-3xl pb-4 tracking-tight text-gray-900 dark:text-white  font-bold">Gallery</h1>
-                <div class="w-[78%] flex items-end justify-end">
+                <div class="md:w-[78%] w-[87%] flex items-end justify-end">
                     <button class="text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" onclick="document.getElementById('modal_add').classList.remove('hidden')">New post</button>
                 </div>
-                <div class="grid grid-cols-3 gap-4 w-[78%] h-96 overflow-y-scroll mt-5 rounded-md">    
+                <div class="grid md:grid-cols-3 gap-4 w-[82%] md:w-[78%] h-96 mt-5 rounded-md">    
                     <div v-for="(data, index) in this.gallery" :key="index">
                         <div class="rounded-lg border bg-white dark:bg-gray-800 dark:border-gray-700 px-4 py-5 shadow-lg">
                             <div class="rounded-md h-40 bg-white">
@@ -32,7 +33,7 @@
                 </div>
             </div>     
         </diV>
-        <ModalAdd class="animate__animated animate__bounceInDown hidden" id="modal_add"/>
+        <ModalAdd @loading="nowLoading" class="animate__animated animate__bounceInDown hidden" id="modal_add"/>
         <ModalEdit class="animate__animated animate__bounceInDown hidden" id="modal_edit" v-bind:gallery_data='gallery_data'/>
     </div>
 </template>            
@@ -45,6 +46,7 @@ import ModalEdit from './admin_modalEdit_gallery.vue'
 import axios from 'axios';
 import Swal from 'sweetalert2'
 import moment from 'moment'
+import Loader from '../layout/loader.vue'
 
 // const PORT = "http://localhost:8080/auth";
 
@@ -53,18 +55,27 @@ export default {
         Adminheader,
         Navbar,
         ModalAdd,
-        ModalEdit
+        ModalEdit,
+        Loader
     },
     data(){
         return{
             gallery : [],
-            gallery_data: {}
+            gallery_data: {},
+            isLoader : 'loader-hide'
         }
     },
     mounted(){
         this.getGallery();
     },
     methods: {
+        nowLoading(){
+            if(this.isLoader==='loader-hide'){
+                this.isLoader = 'loader-display';
+            }else{
+                this.isLoader = 'loader-hide'
+            }
+        },
         moment: function (date) {
             return moment(date).format('MMM D, YYYY');
         },
@@ -84,7 +95,9 @@ export default {
                 confirmButtonText: "Yes, delete it!"
             }).then(async (result) => {
             if (result.isConfirmed) { 
-                await axios.delete(`${this.PORT}/auth/admin/deleteGallery`,
+                this.nowLoading();
+                try {
+                     await axios.delete(`${this.PORT}/auth/admin/deleteGallery`,
                     {
                         headers:{
                             'Content-type':'application/x-www-form-urlencoded',
@@ -93,18 +106,22 @@ export default {
                         data: {
                             id: id
                         }
-                    }
-                )
-                Swal.fire({
-                    position: "center",
-                    title: `Delete`,
-                    text: `Delete success`,
-                    showConfirmButton: false,
-                    timer: 1000,
-                    icon: "success"
-                }).then(()=>{
-                    this.getGallery()
-                });
+                    })
+                    this.nowLoading();
+                    Swal.fire({
+                        position: "center",
+                        title: `Delete`,
+                        text: `Delete success`,
+                        showConfirmButton: false,
+                        timer: 1000,
+                        icon: "success"
+                    }).then(()=>{
+                        this.getGallery()
+                    });
+
+                } catch (error) {
+                    console.log(error)
+                }
             }
             });
         },

@@ -1,18 +1,19 @@
 <template>
     <div class="bg-gray-50 dark:bg-gray-900 w-screen overflow-x-hidden flex flex-row">
         <Adminheader/>
+        <Loader v-bind:isLoader='isLoader'/>
         <div class="flex flex-col w-full">
             <Navbar/>
-            <div class="w-full mt-[5%] ml-[20.5%] text-white animate__animated animate__fadeIn pl-4 px-4">
+            <div class="w-full mt-14 md:mt-[5%] md:ml-[20.5%] text-white animate__animated animate__fadeIn pl-4 px-4">
                 <h1 class="text-3xl pb-4 tracking-tight text-gray-900 dark:text-white  font-bold">Events</h1>
-                <div class="w-[78%] flex justify-between">
-                    <input type="date" name="filter_schedule" id="filter_schedule" v-model="filter_schedule" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-1/4 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required="" @change="filterData(this.filter_schedule)">
+                <div class="w-full md:w-[78%] flex justify-between">
+                    <input type="date" name="filter_schedule" id="filter_schedule" v-model="filter_schedule" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block md:w-1/4 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required="" @change="filterData(this.filter_schedule)">
                     <button class="text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" onclick="document.getElementById('modal_add').classList.remove('hidden')">Add</button>
                 </div>
                 <div class="text-red-500 py-0 px-0 capitalize w-[78%]" id="message">
                     {{message}}
                 </div>
-                <div class="grid grid-cols-3 gap-4 w-[78%] h-96 overflow-y-scroll mt-5 rounded-md">
+                <div class="grid md:grid-cols-3 gap-4 md:w-[78%] md:h-96 md:overflow-y-scroll mt-5 rounded-md">
                     
                     <div v-for="(event, index) in this.events" :key="index">
                         <div class="rounded-lg border bg-white dark:bg-gray-800 dark:border-gray-700 px-4 py-5 shadow-lg">
@@ -47,7 +48,7 @@
                 </div>
             </div>    
         </div>
-        <ModalAdd class="animate__animated animate__bounceInDown hidden" id="modal_add"/>
+        <ModalAdd @loader="nowLoading" class="animate__animated animate__bounceInDown hidden" id="modal_add"/>
     </div>           
 </template>
 <script>
@@ -55,6 +56,7 @@ import axios from 'axios'
 import Adminheader from './../layout/admin_header.vue'
 import Navbar from './../layout/admin_navbar.vue'
 import ModalAdd from './admin_modalAdd_event.vue'
+import Loader from '../layout/loader.vue'
 import moment from 'moment'
 import Swal from 'sweetalert2'
 
@@ -62,18 +64,27 @@ export default {
    components: {
         Adminheader,
         Navbar,
-        ModalAdd
+        ModalAdd,
+        Loader
     },
     data(){
         return{
             events : [],
-            message: ""
+            message: "",
+            isLoader : 'loader-hide',
         }
     },
     mounted(){
         this.getGallery('all');
     },
     methods: {
+        nowLoading(){
+            if(this.isLoader==='loader-hide'){
+                this.isLoader = 'loader-display';
+            }else{
+                this.isLoader = 'loader-hide'
+            }
+        },
          moment: function (date) {
             return moment(date).format('MMM D, YYYY h:mm A');
         },
@@ -114,28 +125,37 @@ export default {
                 confirmButtonText: "Yes, delete it!"
             }).then(async (result) => {
             if (result.isConfirmed) { 
-                await axios.delete(`${this.PORT}/auth/admin/deleteEvent`,
-                    {
-                        headers:{
-                            'Content-type':'application/x-www-form-urlencoded',
-                            "authorization" : `bearer ${token}`,
-                        },
-                        data: {
-                            id: id
+                this.nowLoading();
+                try{
+                    const res = await axios.delete(`${this.PORT}/auth/admin/deleteEvent`,
+                        {
+                            headers:{
+                                'Content-type':'application/x-www-form-urlencoded',
+                                "authorization" : `bearer ${token}`,
+                            },
+                            data: {
+                                id: id
+                            }
                         }
+                    )
+                    if(res.data.message=='delete success'){
+                        Swal.fire({
+                            position: "center",
+                            title: `Delete`,
+                            text: `Delete success`,
+                            showConfirmButton: false,
+                            timer: 1000,
+                            icon: "success"
+                        }).then(()=>{
+                            this.getGallery('all');
+                            this.filter_schedule = ""
+                        });
                     }
-                )
-                Swal.fire({
-                    position: "center",
-                    title: `Delete`,
-                    text: `Delete success`,
-                    showConfirmButton: false,
-                    timer: 1000,
-                    icon: "success"
-                }).then(()=>{
-                    this.getGallery('all');
-                    this.filter_schedule = ""
-                });
+                }catch(err){
+                    console.log(err)
+                }finally{
+                    this.nowLoading();
+                }
             }
             });
         }

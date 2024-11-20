@@ -1,13 +1,14 @@
 <template>
     <div class="bg-gray-50 dark:bg-gray-900 w-screen overflow-x-hidden flex flex-row">
         <Adminheader/>
+        <Loader v-bind:isLoader='isLoader'/>
         <div class="flex flex-col w-full">
             <Navbar/>
-            <div class="w-full mt-[5%] ml-[20.5%] text-white animate__animated animate__fadeIn pl-4">
+            <div class="w-full mt-14 md:mt-[5%] md:ml-[20.5%] text-white animate__animated animate__fadeIn pl-4">
                 <h1 class="text-3xl pb-4 tracking-tight text-gray-900 dark:text-white  font-bold">Course List</h1>
-                <div class="flex flex-row w-full gap-x-3">
-                    <div class="w-full  md:mt-0 sm:max-w-md xl:p-0 animate__animated animate__fadeIn">
-                        <div class="p-6 space-y-4 md:space-y-6 sm:p-8 rounded-lg bg-white shadow dark:border dark:bg-gray-800 dark:border-gray-700" id="add_form">
+                <div class="flex flex-col md:flex-row w-full gap-x-3 md:ml-0 ml-3">
+                    <div class="w-full md:mt-0 sm:max-w-md xl:p-0 animate__animated animate__fadeIn">
+                        <div class="w-[90%] md:w-full p-6 rounded-lg bg-white shadow self-center dark:border dark:bg-gray-800 dark:border-gray-700" id="add_form">
                             <h1 class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
                                Add Course
                             </h1>
@@ -23,7 +24,7 @@
                             </form>
                         </div>
                         <!-- update form -->
-                        <div class="hidden p-6 space-y-4 md:space-y-6 sm:p-8 rounded-lg bg-white shadow dark:border dark:bg-gray-800 dark:border-gray-700" id="update_form">
+                        <div class="hidden w-[90%] md:w-full p-6 space-y-4 md:space-y-6 sm:p-8 rounded-lg bg-white shadow dark:border dark:bg-gray-800 dark:border-gray-700" id="update_form">
                             <h1 class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
                                Edit Course
                             </h1>
@@ -44,14 +45,14 @@
                         </div>
                     </div>
 
-                    <div class="flex flex-col w-[40%] gap-y-2">
+                    <div class="shadow flex flex-col w-[90%] md:w-[40%] gap-y-2 md:mt-0 mt-2">
                         <div class="bg-white dark:bg-gray-800 dark:border-gray-700 p-4 rounded-lg">
                             <div>
                                 <label for="search" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white capitalize">search</label>
                                 <input type="text" @input="searchcourse(this.search)" v-model="search" name="search" id="search" placeholder="Search" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required="">
                             </div>
                         </div>
-                        <p>{{not_found}}</p>
+                        <p class="text-red-600 px-2">{{not_found}}</p>
                         <div class="overflow-x-auto w-full h-80 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700" id="table_content">
                             <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                 <thead class="w-1/4text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -87,20 +88,23 @@
 <script>
 import Adminheader from './../layout/admin_header.vue'
 import Navbar from './../layout/admin_navbar.vue'
+import Loader from '../layout/loader.vue'
 import axios from 'axios';
 import Swal from 'sweetalert2'
 
 export default {
     components: {
         Adminheader,
-        Navbar
+        Navbar,
+        Loader
     },
     data(){
         return {
             datas: [],
             message: "",
             not_found: "",
-            update_data: {}
+            update_data: {},
+            isLoader : 'loader-hide',
         }
     },
     mounted(){
@@ -108,29 +112,53 @@ export default {
         // this.getUpdateData(this.update_data);
     },
     methods: {
+        nowLoading(){
+            if(this.isLoader==='loader-hide'){
+                this.isLoader = 'loader-display';
+            }else{
+                this.isLoader = 'loader-hide'
+            }
+        },
         async addSubmit(e){
             e.preventDefault();
             const token = localStorage.getItem('token');
             const course = this.course;
-            
-            const res = await axios.post(`${this.PORT}/auth/admin/addCourse`,
-                {
-                    course: course.toUpperCase(),
-                },
-                {
-                    headers:{
-                        'Content-type':'application/x-www-form-urlencoded',
-                        "authorization" : `bearer ${token}`,
+            this.nowLoading();
+            try {
+                const res = await axios.post(`${this.PORT}/auth/admin/addCourse`,
+                    {
+                        course: course.toUpperCase(),
+                    },
+                    {
+                        headers:{
+                            'Content-type':'application/x-www-form-urlencoded',
+                            "authorization" : `bearer ${token}`,
+                        }
                     }
-                }
-            );
-            if(res.data.message!=='add success'){
-                this.message = res.data.message;
-            }else{
-                this.message = ""
-                this.course = ""
-                this.displayCourse('all');
+                );
+                Swal.fire({
+                    position: "center",
+                    title: `Success`,
+                    text: `Add Success.`,
+                    showConfirmButton: false,
+                    timer: 1000,
+                    icon: "success"
+                }).then(()=>{
+                    if(res.data.message!=='add success'){
+                        this.message = res.data.message;
+                    }else{
+                        this.message = ""
+                        this.course = ""
+                        this.displayCourse('all');
+                    }
+                })
+                
+            } catch (error) {
+                console.log(error)
+            }finally{
+                this.nowLoading();
             }
+                
         },
 
         searchcourse(search){
@@ -168,18 +196,38 @@ export default {
                 confirmButtonText: "Yes, delete it!"
             }).then(async (result) => {
             if (result.isConfirmed) { 
-                await axios.delete(`${this.PORT}/auth/admin/deleteCourse`,
-                    {
-                        headers:{
-                            'Content-type':'application/x-www-form-urlencoded',
-                            "authorization" : `bearer ${token}`,
-                        },
-                        data: {
-                            id: id
+                this.nowLoading()
+                try{
+                    const res = await axios.delete(`${this.PORT}/auth/admin/deleteCourse`,
+                        {
+                            headers:{
+                                'Content-type':'application/x-www-form-urlencoded',
+                                "authorization" : `bearer ${token}`,
+                            },
+                            data: {
+                                id: id
+                            }
                         }
-                    }
-                )
-                this.displayCourse('all');
+                    )
+                    if(res.data.message=='delete success'){
+                        Swal.fire({
+                            position: "center",
+                            title: `Success`,
+                            text: `Delete Success`,
+                            showConfirmButton: false,
+                            timer: 1000,
+                            icon: "success"
+                        }).then(()=>{
+                            
+                            this.displayCourse('all');
+                        })
+                        
+                    }  
+                }catch(error){
+                    console.log(error)
+                }finally{
+                    this.nowLoading();
+                }
             }
             });
         },
