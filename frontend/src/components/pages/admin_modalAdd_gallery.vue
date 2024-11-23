@@ -12,7 +12,7 @@
                     Post
                 </h1>
                 <form class="space-y-1 md:space-y-2" @submit="addPost" enctype="multipart/form-data" id='form'>
-                    <div class="rounded-md h-80 bg-white">
+                    <div class="rounded-md h-80 bg-gray-200 dark:bg-white">
                        <div class="h-full flex items-center justify-center text-2xl font-bold cursor-pointer" onclick="document.getElementById('upload_img').click()">
                             <img v-if="image" :src="image" class="max-w-full max-h-full w-full h-full rounded-md"/>
                             <span class="uppercase" :class="image?'hidden':''">click to upload</span>

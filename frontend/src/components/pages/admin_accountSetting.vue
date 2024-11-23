@@ -7,8 +7,12 @@
             <div class="mt-14 md:w-[78%] md:mt-[5%] md:ml-[20.5%] text-white animate__animated animate__fadeIn pl-4 px-4">
                 <h1 class="text-3xl pb-4 tracking-tight text-gray-900 dark:text-white  font-bold">Account Setting</h1>
                 <div class="flex flex-col items-center justify-center mx-auto lg:py-0 w-[100%] md:mt-10 mt-5">
-                    <div class="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700  animate__animated animate__fadeIn">
-                        <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
+                    <div v-if="this.loadingContent" class="w-full flex items-center justify-center">
+                        Please Wait...
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700  animate__animated animate__fadeIn">
+                        
+                        <div v-if="!this.loadingContent" class="p-6 space-y-4 md:space-y-6 sm:p-8">
                             <form class="space-y-4 md:space-y-6" @submit="updateAccount">
                                 <div>
                                     <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
@@ -52,7 +56,8 @@ export default {
         return{
             admin: {},
             message: '',
-            isLoader : 'loader-hide'
+            isLoader : 'loader-hide',
+            loadingContent: true
         }
     },
     mounted(){
@@ -68,13 +73,19 @@ export default {
         },
         async getAdminData(){
             const token = localStorage.getItem('token');
-            const res = await axios.get(`${this.PORT}/auth/admin/account`, {
-                 headers: {
-                    authorization : `bear ${token}`
-                }
-            })
-            this.id = (res.data.row)[0].id
-            this.admin = (res.data.row)[0];
+            try{
+                const res = await axios.get(`${this.PORT}/auth/admin/account`, {
+                    headers: {
+                        authorization : `bear ${token}`
+                    }
+                })
+                this.id = (res.data.row)[0].id
+                this.admin = (res.data.row)[0];
+            }catch(err){
+                console.log(err)
+            }finally{
+                this.loadingContent = false;
+            }
         },
         async updateAccount(e){
             e.preventDefault();    
@@ -114,6 +125,7 @@ export default {
                         console.log(error)
                     }finally{
                         this.nowLoading();
+                        
                     }
                 
             }else{

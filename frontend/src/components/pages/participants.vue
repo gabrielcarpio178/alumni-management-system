@@ -11,7 +11,10 @@
             <div class="rounded-lg border bg-white dark:bg-gray-800 dark:border-gray-700 px-4 py-5 shadow-lg">
                 <h1 class="my-1 text-center text-xl font-bold leading-8 text-white capitalize">Participants</h1>
                 <div class="flex flex-col gap-y-5 mt-3 divide-y rounded bg-gray-100 py-2 px-3 text-gray-600 shadow-sm">
-                    <div class="flex flex-col gap-y-3">
+                    <div v-if="!this.loadingParticipant" class="w-full flex items-center justify-center">
+                        Please Wait...
+                    </div>
+                    <div class="flex flex-col gap-y-3" v-if="this.loadingParticipant">
                         <div v-if="this.participants.length===0" class="flex flex-row gap-x-2 px-1 py-2 rounded-lg shadow-lg">
                             No Participants
                         </div>
@@ -139,7 +142,7 @@ export default {
         }
         
     },
-    props: ['participants', 'event_id', 'isAlreadyParticipate']
+    props: ['participants', 'event_id', 'isAlreadyParticipate', 'loadingParticipant']
 }
 </script>
 

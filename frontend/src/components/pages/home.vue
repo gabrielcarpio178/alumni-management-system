@@ -1,7 +1,7 @@
 <template>
     <div class="bg-gray-50 dark:bg-gray-900 flex flex-col gap-10 w-full overflow-x-hidden">
         <Topbar/>
-        <Participants v-if="this.isParticipant" v-bind:participants="participants" v-bind:event_id="event_id" v-bind:isAlreadyParticipate="isAlreadyParticipate" class="animate__animated animate__bounceInDown" @remove="remove" @loading="nowLoading"/>
+        <Participants v-if="this.isParticipant" v-bind:loadingParticipant="loadingParticipant" v-bind:participants="participants" v-bind:event_id="event_id" v-bind:isAlreadyParticipate="isAlreadyParticipate" class="animate__animated animate__bounceInDown" @remove="remove" @loading="nowLoading"/>
         <Loader v-bind:isLoader='isLoader'/>
         <div class="h-screen xl:h-full dark:text-white w-screen animate__animated animate__fadeIn">
             <div class="text-center w-screen pt-32 flex flex-col gap-2">
@@ -18,8 +18,11 @@
             <div v-if="this.isNoPost" class="text-red-600 w-full h-[40vh]">
                 No Events Post
             </div>
+            <div v-if="this.loadingContent" class="dark:text-white text-black h-[40vh] w-full flex items-center justify-center">
+                Please Wait...
+            </div>
             <div class="flex flex-col w-screen md:px-20 mt-10 gap-y-5 px-10">
-                <div v-for="(data, index) in this.datas" :key="index" class="w-full flex flex-col md:flex-row p-3 bg-white rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                <div v-for="(data, index) in this.datas" :key="index" class="w-full flex flex-col md:flex-row p-3 bg-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                     <div class="md:w-1/2 h-80">
                         <img :src="this.PORT+'/uploads/'+data.banner" alt="banner" class="max-w-full max-h-full w-full h-full">
                     </div>
@@ -44,6 +47,7 @@
                     </div>
                 </div>
             </div>
+            
             <Bottombar/>
         </div>
     </div>    
@@ -71,7 +75,8 @@
                 isNoPost: false,
                 isParticipant: false,
                 participants: [],
-                isLoader : 'loader-hide'
+                isLoader : 'loader-hide',
+                loadingContent: true
             }
         },
         mounted(){
@@ -90,9 +95,15 @@
                 return moment(date).format('MMMM D, YYYY - h:mm a');
             },
             async getdata(){
-                var datas_rows = await axios.get(`${this.PORT}/auth/events`);
-                this.isNoPost = datas_rows.data.rows.length===0
-                this.datas = datas_rows.data.rows;
+                try {
+                    var datas_rows = await axios.get(`${this.PORT}/auth/events`);
+                    this.isNoPost = datas_rows.data.rows.length===0
+                    this.datas = datas_rows.data.rows;
+                } catch (error) {
+                    console.log(error);
+                }finally{
+                    this.loadingContent = false;
+                }
             },
             async viewevent(id){
                 if(!this.isLogin){
@@ -109,6 +120,7 @@
                     });
                 }else{
                     this.isParticipant = true
+                    this.loadingParticipant = false;
                     const token = localStorage.getItem('token');
                     var user_id = JSON.parse(localStorage.getItem('student')).id;
                     try {
@@ -127,6 +139,8 @@
                         this.isAlreadyParticipate = arrayOfIds.includes(parseInt(user_id))
                     } catch (error) {
                         console.log(error);
+                    }finally{
+                        this.loadingParticipant = true;
                     }
                     
                     

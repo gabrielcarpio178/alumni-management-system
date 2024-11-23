@@ -3,7 +3,7 @@
         <Topbar/>
         <Loader v-bind:isLoader='isLoader'/>
         <section class="bg-gray-50 dark:bg-gray-900 md:mt-20 mt-24 flex w-screen items-center justify-center">
-            <div class="w-full bg-white rounded-lg shadow dark:border mx-20 dark:bg-gray-800 dark:border-gray-700">
+            <div class="w-full bg-gray-200 rounded-lg shadow dark:border mx-5 md:mx-20 dark:bg-gray-800 dark:border-gray-700">
                 <div class="md:p-6 p-2 space-y-2 md:space-y-6 animate__animated animate__fadeIn">
                     <h1 class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
                         Sign up
@@ -81,7 +81,7 @@
                 </div>
             </div>
         </section>
-        <!-- <Bottombar/> -->
+        <Bottombar/>
     </div>    
 </template>
 

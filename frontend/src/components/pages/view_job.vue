@@ -11,9 +11,12 @@
                 <div v-if="this.isNoPost" class="text-red-600 w-full h-[100vh]">
                     No Post Available
                 </div>
+                <div v-if="this.loadingContent" class="h-[40vh] w-full flex items-center justify-center">
+                    Please Wait...
+                </div>
                 <div class="grid md:grid-cols-3 gap-2 p-10 mr-5">
                     <div v-for="(job, index) in this.jobs" :key="index">
-                        <div class="rounded-lg border bg-white dark:bg-gray-800 dark:border-gray-700 px-4 py-5 shadow-lg flex flex-col items-start">
+                        <div class="rounded-lg border bg-gray-200 dark:bg-gray-800 dark:border-gray-700 px-4 py-5 shadow-lg flex flex-col items-start">
                             <div class="w-full mb-2 flex flex-col justify-center items-center">
                                 <div class="relative mx-auto w-36 h-36 rounded-full">
                                     <img class="rounded-full w-36 h-36 object-center" :src="job.profile_pic===null?getThumbnel(job.firstname, job.lastname):`${this.PORT}/uploads/${job.profile_pic}`" :alt="job.firstname+' '+job.lastname" />
@@ -77,7 +80,8 @@ export default{
             isLoader : 'loader-hide',
             isShowEdit_form: false,
             job: {},
-            isNoPost: false
+            isNoPost: false,
+            loadingContent: true
         }
     },
     mounted(){
@@ -105,6 +109,8 @@ export default{
                 // console.log(res.data.rows);
             } catch (error) {
                 console.log(error)
+            }finally{
+                this.loadingContent = false;
             }
         },
         removeProfle(){

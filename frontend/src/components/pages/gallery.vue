@@ -9,9 +9,12 @@
                 <div v-if="this.isNoPost" class="text-red-600 w-full h-[40vh] text-center">
                     No Job Post Available
                 </div>
+                <div v-if="this.loadingContent" class="dark:text-white text-black h-[40vh] w-full flex items-center justify-center">
+                    Please Wait...
+                </div>
                 <div class="grid md:grid-cols-3 gap-6 mt-5">
                     <div v-for="(data, index) in this.gallery_data" :key="index">
-                        <div class="rounded-lg border bg-white dark:bg-gray-800 dark:border-gray-700 px-4 py-5 shadow-lg">
+                        <div class="rounded-lg border bg-gray-200 dark:bg-gray-800 dark:border-gray-700 px-4 py-5 shadow-lg">
                             <div class="rounded-md h-40 bg-white">
                                 <div class="h-full flex items-center justify-center text-2xl font-bold">
                                     <img :src="this.PORT+'/uploads/'+data.image" class="max-w-full max-h-full w-full h-full rounded-md"/>
@@ -49,7 +52,8 @@ export default {
     data(){
         return {
             gallery_data: [],
-            isNoPost: false
+            isNoPost: false,
+            loadingContent: true
         }
     },
 
@@ -62,9 +66,15 @@ export default {
             return moment(date).format('MMM D, YYYY');
         },
         async getGalleryData(){
-            const res = await axios.get(`${this.PORT}/auth/admin/gallery`)
-            this.isNoPost = res.data.rows.length===0
-            this.gallery_data = res.data.rows;
+            try {
+                const res = await axios.get(`${this.PORT}/auth/admin/gallery`)
+                this.isNoPost = res.data.rows.length===0
+                this.gallery_data = res.data.rows;
+            } catch (error) {
+                console.log(error)
+            }finally{
+                this.loadingContent = false;
+            }
         }
     }
 }    

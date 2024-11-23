@@ -9,9 +9,12 @@
                 <div class="md:w-[78%] w-[87%] flex items-end justify-end">
                     <button class="text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" onclick="document.getElementById('modal_add').classList.remove('hidden')">New post</button>
                 </div>
-                <div class="grid md:grid-cols-3 gap-4 w-[82%] md:w-[78%] h-96 mt-5 rounded-md">    
+                <div v-if="this.loadingContent" class="h-[40vh] w-full flex items-center justify-center">
+                    Please Wait...
+                </div>
+                <div v-if="!this.loadingContent" class="grid md:grid-cols-3 gap-4 w-[82%] md:w-[78%] md:h-96 mt-5 rounded-md">    
                     <div v-for="(data, index) in this.gallery" :key="index">
-                        <div class="rounded-lg border bg-white dark:bg-gray-800 dark:border-gray-700 px-4 py-5 shadow-lg">
+                        <div class="rounded-lg border bg-gray-200 dark:bg-gray-800 dark:border-gray-700 px-4 py-5 shadow-lg">
                             <div class="rounded-md h-40 bg-white">
                                 <div class="h-full flex items-center justify-center text-2xl font-bold">
                                         <img :src="this.PORT+'/uploads/'+data.image" class="max-w-full max-h-full w-full h-full rounded-md"/>
@@ -62,7 +65,8 @@ export default {
         return{
             gallery : [],
             gallery_data: {},
-            isLoader : 'loader-hide'
+            isLoader : 'loader-hide',
+            loadingContent: true
         }
     },
     mounted(){
@@ -80,8 +84,15 @@ export default {
             return moment(date).format('MMM D, YYYY');
         },
         async getGallery(){
-            const res = await axios.get(`${this.PORT}/auth/admin/gallery`)
-            this.gallery = res.data.rows;
+            try {
+                const res = await axios.get(`${this.PORT}/auth/admin/gallery`)
+                this.gallery = res.data.rows;
+            } catch (error) {
+                console.log(error)
+            }finally{
+                this.loadingContent = false;
+            }
+            
         },
         async delateGallery(id){
             const token = localStorage.getItem('token');

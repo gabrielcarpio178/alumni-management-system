@@ -6,7 +6,12 @@
                 <h1 class="text-3xl font-bold">
                     About Us
                 </h1>
-                <div class="w-full h-[100vh] md:h-[54vh] flex md:flex-row flex-col px-10 md:px-28">
+
+                <div v-if="this.loadingContent" class="h-[40vh] w-full flex items-center justify-center">
+                    Please Wait...
+                </div>
+
+                <div v-if="!this.loadingContent" class="w-full h-[100vh] md:h-[54vh] flex md:flex-row flex-col px-10 md:px-28">
                     <div class="w-full md:w-1/2 flex flex-row items-center justify-center">
                         <img src="../image/itechlogo.png" class="max-h-[100%]" alt="Itech logo" />
                     </div>
@@ -34,6 +39,7 @@
         data(){
             return {
                 system_data: {},
+                 loadingContent: true
                 
             }
         },
@@ -48,6 +54,8 @@
                     this.system_data = res.data.row
                 } catch (error) {
                     console.log(error)
+                }finally{
+                    this.loadingContent = false;
                 }
                 
             },

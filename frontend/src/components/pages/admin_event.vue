@@ -13,10 +13,13 @@
                 <div class="text-red-500 py-0 px-0 capitalize w-[78%]" id="message">
                     {{message}}
                 </div>
-                <div class="grid md:grid-cols-3 gap-4 md:w-[78%] md:h-96 md:overflow-y-scroll mt-5 rounded-md">
+                <div v-if="this.loadingContent" class="w-full flex items-center justify-center">
+                    Please Wait...
+                </div>
+                <div v-if="!this.loadingContent" class="grid md:grid-cols-3 gap-4 md:w-[78%] md:h-96 md:overflow-y-scroll mt-5 rounded-md">
                     
                     <div v-for="(event, index) in this.events" :key="index">
-                        <div class="rounded-lg border bg-white dark:bg-gray-800 dark:border-gray-700 px-4 py-5 shadow-lg">
+                        <div class="rounded-lg border bg-gray-200 dark:bg-gray-800 dark:border-gray-700 px-4 py-5 shadow-lg">
                             <div class="block mb-2 text-sm font-medium text-gray-900 dark:text-white capitalize">Banner</div>
                             <div class="rounded-md h-40 bg-white">
                                 <div class="h-full flex items-center justify-center text-2xl font-bold">
@@ -72,6 +75,7 @@ export default {
             events : [],
             message: "",
             isLoader : 'loader-hide',
+            loadingContent: true
         }
     },
     mounted(){
@@ -90,19 +94,26 @@ export default {
         },
         async getGallery(filter){
             const token = localStorage.getItem('token');
-            const res = await axios.get(`${this.PORT}/auth/admin/event/${filter}`, {
-                 headers: {
-                    authorization : `bear ${localStorage.getItem('token')}`
+            try {
+                 const res = await axios.get(`${this.PORT}/auth/admin/event/${filter}`, {
+                    headers: {
+                        authorization : `bear ${localStorage.getItem('token')}`
+                    }
+                })
+                
+                if((res.data.rows).length!=0){
+                    this.events = res.data.rows;
+                    this.message = ""
+                }else{
+                    this.message = "not found event"
+                    this.events = []
                 }
-            })
-            
-            if((res.data.rows).length!=0){
-                this.events = res.data.rows;
-                this.message = ""
-            }else{
-                this.message = "not found event"
-                this.events = []
+            } catch (error) {
+                console.log(error)
+            }finally{
+                this.loadingContent = false;
             }
+           
             
         },
         filterData(filter){

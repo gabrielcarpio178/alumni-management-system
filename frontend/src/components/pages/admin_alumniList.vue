@@ -8,7 +8,7 @@
                 <h1 class="text-3xl pb-4 tracking-tight text-gray-900 dark:text-white  font-bold">Alumni List</h1>
                 <div class="flex w-full flex-col gap-y-3">
                     <div class="flex gap-x-40">
-                        <div class="flex gap-x-3 bg-white shadow md:w-1/4 w-[97%] dark:border dark:bg-gray-800 dark:border-gray-700 p-6 rounded-md">
+                        <div class="flex gap-x-3 bg-gray-200 shadow md:w-1/4 w-[97%] dark:border dark:bg-gray-800 dark:border-gray-700 p-6 rounded-md">
                             <div class="w-full">
                                 <label for="search" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white capitalize">Search</label>
                                 <input type="text" name="search" id="search" placeholder="Search" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 capitalize" v-model="search" @input="getdata(this.search)">
@@ -17,8 +17,11 @@
                     </div>
 
                     <div class="w-[97%] md:w-[78.5%] h-80 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 overflow-y-scroll" id="table_content">
+                        <div v-if="this.loadingContent" class="dark:text-white text-black w-full flex items-center justify-center">
+                            Please Wait...
+                        </div>
                         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-200 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
                                     <th scope="col" class="px-6 py-3 text-center">
                                         name
@@ -42,7 +45,7 @@
                             </thead>
                              <tbody >
                                   
-                                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 uppercase cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" v-for="(data, index) in this.datas" :key="index" @click="viewuser(index)">
+                                <tr class="bg-gray-200 border-b dark:bg-gray-800 dark:border-gray-700 uppercase cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" v-for="(data, index) in this.datas" :key="index" @click="viewuser(index)">
                                     <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white text-center">
                                             {{data.firstname + " " + data.lastname}}
                                     </td>
@@ -94,7 +97,8 @@ export default {
             alumni_data: {},
             search : '',
             isLoader : 'loader-hide',
-            message: ''
+            message: '',
+            loadingContent: true
         }
     },
     mounted(){
@@ -115,16 +119,24 @@ export default {
             if(search==''){
                 search = 'all';
             }
-            const res = await axios.get(`${this.PORT}/auth/admin/alumnilist/${search}`,{
-                headers: {
-                    authorization : `bear ${localStorage.getItem('token')}`
+            this.loadingContent = true;
+            try {
+                const res = await axios.get(`${this.PORT}/auth/admin/alumnilist/${search}`,{
+                    headers: {
+                        authorization : `bear ${localStorage.getItem('token')}`
+                    }
+                })
+                this.message = ''
+                if(res.data.message==='not found'){
+                    this.message = 'not found'
                 }
-            })
-            this.message = ''
-            if(res.data.message==='not found'){
-                this.message = 'not found'
+                this.datas = res.data.rows;
+            } catch (error) {
+                console.log(error)
+            }finally{
+                this.loadingContent = false;
             }
-            this.datas = res.data.rows;
+            
         },
         async viewuser(index){
             document.querySelector("#modal_content").classList.remove('hidden')

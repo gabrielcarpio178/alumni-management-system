@@ -7,11 +7,14 @@
             <div class="overflow-x-hidden mt-14 md:w-[78%] md:mt-[5%] md:ml-[20.5%] dark:text-white animate__animated animate__fadeIn px-2 md:pl-4 md:px-4">
                 <h1 class="text-3xl pb-4 tracking-tight text-gray-900 dark:text-white  font-bold">Jobs</h1>
                 <div class="text-2xl text-red-600" v-if="this.message">No Jobs Posted</div>
-                <div class="md:p-3.5 dark:text-white w-full">
+                <div v-if="this.loadingContent" class="w-full flex items-center justify-center">
+                    Please Wait...
+                </div>
+                <div v-if="!this.loadingContent" class="md:p-3.5 dark:text-white w-full">
                     <div class="text-center w-full flex flex-col gap-2">
                         <div class="grid md:grid-cols-2 gap-2 md:mr-5">
                             <div v-for="(job, index) in this.jobs" :key="index">
-                                <div class="rounded-lg border bg-white dark:bg-gray-800 dark:border-gray-700 px-4 py-5 shadow-lg flex flex-col items-start">
+                                <div class="rounded-lg border bg-gray-200 dark:bg-gray-800 dark:border-gray-700 px-4 py-5 shadow-lg flex flex-col items-start">
                                     <div class="w-full mb-2 flex flex-col justify-center items-center">
                                         <div class="relative mx-auto w-36 h-36 rounded-full">
                                             <img class="shadow rounded-full w-36 h-36 object-center" :src="job.profile_pic===null?getThumbnel(job.firstname, job.lastname):`${this.PORT}/uploads/${job.profile_pic}`" :alt="job.firstname+' '+job.lastname" />
@@ -67,7 +70,8 @@ export default {
             job: {},
             isShow_Jobs: false,
             isLoader : 'loader-hide',
-            message: false
+            message: false,
+            loadingContent: true
         }
     },
     mounted(){
@@ -102,7 +106,9 @@ export default {
                 this.jobs = res.data.rows
             } catch (error) {
                 console.log(error);
-            }    
+            }finally{
+                this.loadingContent = false;
+            }
         },
         viewJob(index){
             this.job = this.jobs[index];
