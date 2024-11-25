@@ -15,6 +15,7 @@ import view_job from './../components/pages/view_job.vue'
 import admin_job from './../components/pages/admin_job.vue'
 import system_setting from './../components/pages/admin_systemSetting.vue'
 import about from './../components/pages/about.vue'
+import otp from './../components/pages/otppage.vue'
 
 const router = createRouter({
     routes: [
@@ -131,6 +132,14 @@ const router = createRouter({
             name: "about",
             component: about
         },
+        {
+            path: "/otp", 
+            name: "otp",
+            component: otp,
+            meta:{
+                requiresAuth: true,
+            }
+        },
     ],
     history: createWebHistory()
 })
@@ -144,6 +153,14 @@ router.beforeEach(async (to, from, next) => {
 
     if(localStorage.getItem('role')==='student'&&!admin_page.includes(to.name)){
         to.meta.requiresAuth = false;
+    }
+
+    if(localStorage.getItem('role')==='verification'){
+        to.meta.requiresAuth = false;
+    }
+
+    if(localStorage.getItem('role')!=='verification'){
+        localStorage.removeItem('req_data');
     }
 
     if(localStorage.getItem('role')==='admin'&&!admin_page.includes(to.name)){

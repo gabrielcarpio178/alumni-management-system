@@ -3,6 +3,8 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { unlink } from 'node:fs';
 import { JWT_KEY } from '../middleware/verifyToken.js'
+import moment from 'moment'
+import {main} from '../lib/sendemail.js'
 
 export const login = async (req, res) => {
     const {email, password} = req.body;
@@ -34,8 +36,15 @@ export const login = async (req, res) => {
     }
 }
 
+const generateOtp = () => {
+    return Math.floor(1000 + Math.random() * 9000);
+}
+
 export const register = async (req, res)=>{
     const {lastname, firstname, middlename, gender, birthday, course, contactnumber, batch, email, student_id, password} = req.body;
+    const expire_time = moment().add(30, 'minutes').format();
+    const otp = generateOtp().toString();
+    const hashOtp = await bcrypt.hash(otp, 10)
     if(student_id.toString().length===11){
         try {
             const db = await connectToDatabase()
@@ -48,18 +57,50 @@ export const register = async (req, res)=>{
             if(admin_row.length > 0) {
                 return res.status(201).json({message : "user already existed"})
             }
-    
-            const hashPassword = await bcrypt.hash(password, 10)
-            await db.query(`INSERT INTO students(firstname, middlename, lastname, gender, birthday, course, batch, contact_num, student_id, email, password) VALUES ('${firstname}','${middlename}','${lastname}','${gender}','${birthday}','${course}', '${batch}', '0${contactnumber}','${student_id}', '${email}','${hashPassword}')`);
-            return res.status(201).json({message: "user created successfully"})
-    
+
+            const message = `<h1>Your OTP is ${otp}</h1><p>This code is valid for 30 minutes. Please enter it on the website to complete your verification. If you didn’t request this, please ignore this message.</p>`
+            const subjectSend = "Verify Your Account";
+            main(email, message, subjectSend).catch(e=>{
+                console.log(e)
+            })
+
+            return res.status(201).json({message: "user created successfully", role: 'verification', request_data: {lastname, firstname, middlename, gender, birthday, course, contactnumber: "0"+contactnumber.toString(), batch, email, student_id, password, expire_time, hashOtp}})
         } catch(err) {
             return res.status(500).json(err.message)
         }
     }
-    
     return res.status(201).json({message: "Student id must be 11 digits"})
 } 
+
+export const resendOTP = async (req, res) => {
+    const email = req.body.email;
+    const otp = generateOtp().toString();
+    const expire_time = moment().add(30, 'minutes').format();
+    const hashOtp = await bcrypt.hash(otp, 10)
+
+    const message = `<h1>Your OTP is ${otp}</h1><p>This code is valid for 30 minutes. Please enter it on the website to complete your verification. If you didn’t request this, please ignore this message.</p>`
+    const subjectSend = "Verify Your Account";
+    main(email, message, subjectSend).catch(e=>{
+        console.log(e)
+    })
+    return res.status(201).json({request_data: {expire_time, hashOtp}})
+}
+
+export const verification_OTP = async (req, res)=>{
+    const {lastname, firstname, middlename, gender, birthday, course, contactnumber, batch, email, student_id, password, hashOtp, otp} = req.body;
+    var isMatch = await bcrypt.compare(otp, hashOtp);
+    if(isMatch){
+        try {
+            const db = await connectToDatabase();
+            const hashPassword = await bcrypt.hash(password, 10)
+            await db.query(`INSERT INTO students(firstname, middlename, lastname, gender, birthday, course, batch, contact_num, student_id, email, password) VALUES ('${firstname}','${middlename}','${lastname}','${gender}','${birthday}','${course}', '${batch}', '0${contactnumber}','${student_id}', '${email}','${hashPassword}')`);
+            return res.status(200).json({message: 'success'})
+        } catch (error) {
+            return res.status(500).json({message: 'server error'})
+        }
+    }
+    return res.status(200).json({message: 'invalid otp'})
+}
 
 export const add_course = async (req, res)=>{
     const course = req.body.course;

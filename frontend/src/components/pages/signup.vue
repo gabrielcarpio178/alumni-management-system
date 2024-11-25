@@ -17,7 +17,7 @@
 
                             <div>
                                 <label for="middlename" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white capitalize">middlename</label>
-                                <input type="text" name="middlename" v-model="middlename" id="middlename" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Lastname" required>
+                                <input type="text" name="middlename" v-model="middlename" id="middlename" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Middlename" required>
                             </div>
                             
                             <div>
@@ -157,14 +157,15 @@
                         const res = await axios.post(`${this.PORT}/auth/register`,sendData);
                         if(res.status===201){
                             if(res.data.message==="user created successfully"){
-                                this.nowLoading();
-                                  Swal.fire({
+                                localStorage.setItem('req_data', JSON.stringify(res.data.request_data))
+                                localStorage.setItem('role', res.data.role)
+                                Swal.fire({
                                     position: "center",
                                     title: `Success`,
-                                    text: `Wait for admin to activate your account.`,
+                                    text: `Check your email`,
                                     icon: "success"
                                 }).then(()=>{
-                                    window.location = "/login"
+                                    window.location = "/otp"
                                 });
                                 
                             }else{
@@ -173,6 +174,8 @@
                         }
                     } catch (error){
                         document.getElementById("message").textContent = "Something wrong";
+                    }finally{
+                        this.nowLoading();
                     }
                 }
                 else{

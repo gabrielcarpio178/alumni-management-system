@@ -1,14 +1,18 @@
 import express from 'express'
 import {upload} from '../lib/multer_lib.js'
 import { verifyToken } from '../middleware/verifyToken.js'
-import { login, register, add_course, update_profile, alumni, post_job, post_gallery, post_event } from '../controller/postcontroller.js'
+import { login, register, resendOTP, verification_OTP ,add_course, update_profile, alumni, post_job, post_gallery, post_event } from '../controller/postcontroller.js'
 import { course, student_id, alumnilist_search, participant_id, job_id, job_id_user, admin_home, get_gallery, admin_job, event_filter, get_admin_accont, system_setting, events } from '../controller/getcontroller.js'
 import { edit_course, user_statsUpdate, edit_job, system_setting_update, admin_accont } from '../controller/putcontroller.js'
-import { delete_course, delete_participant, delete_job, deleleGallery, deleteEvent } from '../controller/deletecontroller.js'
+import { delete_course, delete_participant, delete_job, deleleGallery, deleteEvent, deleteReq } from '../controller/deletecontroller.js'
 
 const router = express.Router();
 
 router.post('/register', register);
+
+router.post('/resend_OTP', resendOTP);
+
+router.post('/verification_OTP', verification_OTP);
 
 router.post('/login', login);
 
@@ -23,6 +27,8 @@ router.put('/admin/editCourse', verifyToken, edit_course);
 router.delete('/admin/deleteCourse', verifyToken, delete_course)
 
 router.put('/admin/user_statsUpdate', verifyToken, user_statsUpdate);
+
+router.delete('/admin/deleteaccount', verifyToken, deleteReq);
 
 router.get('/admin/alumnilist/:search', verifyToken, alumnilist_search)
 

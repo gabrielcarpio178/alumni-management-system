@@ -1,7 +1,4 @@
 import {connectToDatabase} from '../lib/db.js'
-import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
-import { unlink } from 'node:fs';
 
 export const course = async (req, res)=>{
     const search = req.params.search;
