@@ -15,7 +15,7 @@
                     <div class="w-full md:w-1/2 flex flex-row items-center justify-center">
                         <img src="../image/itechlogo.png" class="max-h-[100%]" alt="Itech logo" />
                     </div>
-                    <div class="w-full md:w-1/2 flex flex-row items-center justify-center text-center font-bold text-2xl">
+                    <div class="w-full md:w-1/2 flex flex-row items-center justify-center text-center font-bold text-sm">
                         {{this.system_data.about}}
                     </div>
                 </div>

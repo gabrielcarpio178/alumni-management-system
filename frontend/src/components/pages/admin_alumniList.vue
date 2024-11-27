@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-gray-50 dark:bg-gray-900 w-screen overflow-x-hidden flex flex-row">
+    <div class="bg-gray-50 dark:bg-gray-900 w-screen overflow-x-hidden flex flex-row relative">
         <Adminheader/>
         <Loader v-bind:isLoader='isLoader'/>
         <div class="flex flex-col w-full">
@@ -45,7 +45,7 @@
                             </thead>
                              <tbody >
                                   
-                                <tr class="bg-gray-200 border-b dark:bg-gray-800 dark:border-gray-700 uppercase cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" v-for="(data, index) in this.datas" :key="index" @click="viewuser(index)">
+                                <tr v-for="(data, index) in this.datas" :key="index" @click="viewuser(index)" class="bg-gray-200 border-b dark:bg-gray-800 dark:border-gray-700 uppercase cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
                                     <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white text-center">
                                             {{data.firstname + " " + data.lastname}}
                                     </td>
@@ -56,7 +56,7 @@
                                             {{moment(data.birthday)}}
                                     </td>
                                     <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white text-center">
-                                            {{data.course}}
+                                            {{data.course_name}}
                                     </td>
                                     <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white text-center">
                                             {{data.student_id}}
@@ -130,7 +130,8 @@ export default {
                 if(res.data.message==='not found'){
                     this.message = 'not found'
                 }
-                this.datas = res.data.rows;
+                this.datas = res.data.ret_alumnu;
+                console.log(res.data.ret_alumnu)
             } catch (error) {
                 console.log(error)
             }finally{

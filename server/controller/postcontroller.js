@@ -102,6 +102,17 @@ export const verification_OTP = async (req, res)=>{
     return res.status(200).json({message: 'invalid otp'})
 }
 
+export const addAccomplishment = async (req, res)=>{
+    const {student_id, accomplishment} = req.body;
+    try {
+            const db = await connectToDatabase();
+            await db.query(`INSERT INTO accomplishment(student_id, accomplishment) VALUES ('${student_id}','${accomplishment}')`);
+            return res.status(200).json({message: 'success'})
+        } catch (error) {
+            return res.status(500).json({message: 'server error'})
+        }
+}
+
 export const add_course = async (req, res)=>{
     const course = req.body.course;
     try {

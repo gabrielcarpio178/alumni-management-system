@@ -13,13 +13,26 @@
                             <h2 class="text-grey text-sm mb-4 dark:text-gray-400">Create Profile</h2>
 
                             <form class="w-full" enctype="multipart/form-data" @submit="editSave">
-                               <div class="flex justify-center">
-                                    <div class="w-36 h-36 rounded-full cursor-pointer hover:scale-110 transition-all relative" onclick="document.getElementById('upload_img').click()">
-                                        <img  v-if="this.image!==''" :src="image" alt="profile" class="w-36 h-36 object-center rounded-full">
-                                        <img v-else :src="student.profile_pic===null?getThumbnel(student.firstname, student.lastname):`${this.PORT}/uploads/${student.profile_pic}`" alt="profile" class="w-36 h-36 object-center rounded-full">
-
+                               <div class="w-full flex md:flex-row items-center justify-center flex-col gap-x-5">
+                                    <div class="h-36 rounded-full cursor-pointer transition-all relative hover:scale-105" onclick="document.getElementById('upload_img').click()">
+                                        <img  v-if="this.image!==''" :src="image" alt="profile" class="w-36 h-36 object-center rounded-full shadow-lg">
+                                        <img v-else :src="student.profile_pic===null?getThumbnel(student.firstname, student.lastname):`${this.PORT}/uploads/${student.profile_pic}`" alt="profile" class="w-36 h-36 object-center rounded-full shadow-lg">
                                     </div>
                                     <input type="file" ref="file" class="hidden" id="upload_img" @change="onSelect">
+                                    <div class="flex flex-col md:w-3/4 w-full gap-y-2">
+                                        <div class="flex flex-row gap-x-2 items-center">
+                                            <h2 class="text-black dark:text-grey text-sm dark:text-gray-400">Accomplishments</h2>
+                                            <button type="button" class="w-10 bg-primary-600 hover:bg-primary-700 rounded" @click="this.removeAddAccomplishmentform">+</button>
+                                        </div>
+                                        <div class="h-full rounded-lg p-0.5">
+                                             <section class="px-1 py-0.5 dark:text-gray-100 grid md:grid-cols-3 grid-cols-2 gap-2 h-full md:grid-rows-5 text-black">
+                                                
+                                                <div v-if="this.accomplishments_data.length===0" class="capitalize rounded border border-white shadow-lg dark:bg-gray-800 dark:border-gray-700 nowrap md:text-sm text-xs p-1" >No Accomplishments Added</div>
+                                                <div v-if="this.isloading" class="capitalize nowrap md:text-sm text-xs p-1" >Please wait..</div>
+                                                <div v-for="(data, index) in this.accomplishments_data" :key="index" class="capitalize rounded border border-white shadow-lg dark:bg-gray-800 dark:border-gray-700 nowrap md:text-sm text-xs p-1 cursor-pointer hover:scale-105" @click="selectedAccomplishmentData(data.id, data.accomplishment)">{{data.accomplishment}}</div>
+                                             </section>
+                                        </div>
+                                    </div>
                                </div>
                                <div class="grid md:grid-cols-3 gap-5">
                                     <div class="flex flex-col w-full">
@@ -103,7 +116,7 @@
                                     </div>
                                </div>
                                 <div class="grid place-items-center mt-5">
-                                    <button type="submit" class="w-1/4 text-white    bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Save</button>
+                                    <button type="submit" class="w-1/4 text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Save</button>
                                 </div>
                             </form>
                         </div>
@@ -111,6 +124,9 @@
                 </div>
             </section>
         </div>
+        <AddformAccomplishment v-if="this.isAccomplishmentShow" @removeAddAccomplishmentform="removeAddAccomplishmentform"
+        @isloder="isloder" @getAccomplishment="getAccomplishment" class="animate__animated animate__bounceInDown"/>
+        <EditformAccomplishment v-if="this.isEditAccomplishmentShow" @removeEditAccomplishmentform="removeEditAccomplishmentform" @getAccomplishment="getAccomplishment" class="animate__animated animate__bounceInDown" v-bind:selectedAccomplishment="selectedAccomplishment" @isloder="isloder"/>
     </div>    
 </template>
 
@@ -120,11 +136,15 @@
     import axios from 'axios';
     import Loader from '../layout/loader.vue'
     import Swal from 'sweetalert2';
+    import AddformAccomplishment from './addFormAccomplishment.vue';
+    import EditformAccomplishment from './editFormAccomplishment.vue';
     
     export default{
         components: { 
             Topbar,
-            Loader 
+            Loader,
+            AddformAccomplishment,
+            EditformAccomplishment
         },
         data(){
             return {
@@ -133,12 +153,18 @@
                 image : '',
                 file: "",
                 datas: [],
-                isLoader : 'loader-hide'
+                isLoader : 'loader-hide',
+                isAccomplishmentShow: false,
+                accomplishments_data: [],
+                isloading: true,
+                isEditAccomplishmentShow: false,
+                selectedAccomplishment: {}
             }
         },
         mounted(){
             this.getyear();
             this.getcourse();
+            this.getAccomplishment();
         },
         methods: {
             
@@ -242,7 +268,44 @@
                     
                 }
 
+            },
+            removeAddAccomplishmentform(){
+                this.isAccomplishmentShow = !this.isAccomplishmentShow;
+            },
+            isloder(){
+               this.isLoader = this.isLoader != 'loader-hide'?'loader-hide':'loader-display';
+            },
+            
+            async getAccomplishment(){
+                this.isloading = true;
+                const student_id = JSON.parse(localStorage.getItem('student')).id;
+                const token = localStorage.getItem('token');
+                try {
+                    var res = await axios.get(`${this.PORT}/auth/student/accomplishment/${student_id}`, {
+                        headers:{
+                            'Content-type':'application/x-www-form-urlencoded',
+                            "authorization" : `bearer ${token}`,
+                        }
+                    })
+                    this.accomplishments_data = res.data.accomplishments;
+                } catch (error) {
+                    console.log(error)
+                }finally{
+                    this.isloading = false;
+                }
+            },
+
+            removeEditAccomplishmentform(){
+                this.isEditAccomplishmentShow = !this.isEditAccomplishmentShow
+            },
+
+            selectedAccomplishmentData(id, accomplishment){
+                this.selectedAccomplishment.id = id
+                this.selectedAccomplishment.accomplishment = accomplishment
+                this.isEditAccomplishmentShow = !this.isEditAccomplishmentShow;
             }
+
+
 
         }
     }    

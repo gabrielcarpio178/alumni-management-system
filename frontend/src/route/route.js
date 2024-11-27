@@ -16,6 +16,7 @@ import admin_job from './../components/pages/admin_job.vue'
 import system_setting from './../components/pages/admin_systemSetting.vue'
 import about from './../components/pages/about.vue'
 import otp from './../components/pages/otppage.vue'
+import alumni from './../components/pages/alumni_list.vue'
 
 const router = createRouter({
     routes: [
@@ -99,6 +100,14 @@ const router = createRouter({
             path: "/jobs", 
             name: "jobs",
             component: jobs,
+            meta: {
+                requiresAuth: true,
+            }
+        },
+        {
+            path: "/alumni", 
+            name: "alumni",
+            component: alumni,
             meta: {
                 requiresAuth: true,
             }
