@@ -10,8 +10,13 @@
                     <label for="search" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Search</label>
                     <input type="text" name="search" id="search" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search" v-model="this.search" @input="this.getAlumni_data(this.search)" required="">
                 </div>
+
+                <div class="text-center dark:text-white text-black" v-if="this.isLoading">
+                    Please Wait...
+                </div>
+
                 <div class="grid md:grid-cols-3 gap-2">
-                    <div v-for="(alumni, index) in this.getAlumni" :key="index" class="rounded-lg bg-gray-200 dark:bg-gray-800 dark:border-gray-700 px-4 py-5 shadow-lg flex flex-row gap-x-3 text-black dark:text-white">
+                    <div v-for="(alumni, index) in this.getAlumni" :key="index" class="rounded-lg bg-gray-200 dark:bg-gray-800 dark:border-gray-700 px-1 py-2 shadow-lg flex flex-row gap-x-3 text-black dark:text-white">
                         <div class="w-1/2 mb-2 flex flex-col items-center gap-y-2 h-full">
                             <div class="relative w-20 h-20 rounded-full">
                                 <img class="shadow-lg rounded-full w-20 h-20 object-center" :src="alumni.profile_pic===null?getThumbnel(alumni.firstname, alumni.lastname):`${this.PORT}/uploads/${alumni.profile_pic}`" :alt="alumni.firstname+' '+alumni.lastname" />
@@ -38,9 +43,9 @@
                                 Accomplishment
                             </div>
                             <div class="w-full h-full flex flex-col mt-2">
-                                <div v-if="alumni.accomplishments[0]===null" class="capitalize text-nowrap  text-xs p-1">No Accomplishments Added</div>
+                                <div v-if="alumni.accomplishments[0]===null" class="capitalize text-[0.50rem] md:text-xs p-1">No Accomplishments</div>
                                 <div v-for="(data, index) in alumni.accomplishments" :key="index">
-                                    <div v-if="data!==null" class="capitalize rounded shadow-lg dark:bg-gray-800 dark:border-gray-700  text-xs p-1">{{data}}</div>
+                                    <div v-if="data!==null" class="capitalize rounded shadow-lg dark:bg-gray-800 dark:border-gray-700 p-1 text-[0.50rem] md:text-xs">{{data}}</div>
                                 </div>
                             </div>
                         </div>
@@ -64,7 +69,8 @@ export default {
     },
     data(){
         return {
-            getAlumni: []
+            getAlumni: [],
+            isLoading: true
         }
     }
     ,
@@ -89,6 +95,8 @@ export default {
                 this.getAlumni = res.data.data_result;
             } catch (error) {
                 console.log(error)
+            }finally{
+                this.isLoading = false
             }
         }
     }
