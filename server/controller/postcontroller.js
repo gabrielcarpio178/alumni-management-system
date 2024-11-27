@@ -160,7 +160,6 @@ export const update_profile = async (req, res)=>{
         if(data[0].profile_pic !== null&&req.file !== undefined){
             unlink(`uploads/${data[0].profile_pic}`, (err) => {
                 if (err) throw err;
-                // console.log(`uploads/${data[0].profile_pic} was deleted`);
             });
         }
 
