@@ -13,7 +13,7 @@
                         <img class="rounded-full w-36 h-36 object-center shadow-md" :src="job.profile_pic===null?getThumbnel(job.firstname, job.lastname):`${this.PORT}/uploads/${job.profile_pic}`" :alt="job.firstname+' '+job.lastname" />
                     </div>
                     <div class="text-center capitalize text-2xl font-bold">
-                        {{job.firstname}} {{job.lastname}}
+                        {{job.firstname!=job.lastname?job.firstname+' '+job.lastname:job.firstname}}
                     </div>
                 </div>
                 <div class="rounded shadow-md p-2 w-full flex flex-col gap-y-1 mb-3">
@@ -64,7 +64,11 @@ export default {
             return moment(date).format('MMM. D, YYYY');
         },
         getThumbnel(firstname, lastname){
-            return `https://ui-avatars.com/api/?name=${firstname}+${lastname}`
+            if(firstname!=lastname){
+                return `https://ui-avatars.com/api/?name=${firstname}+${lastname}`
+            }else{
+                return `https://ui-avatars.com/api/?name=${firstname}`
+            }
         },
         callremovejob(){
             this.$emit('callremovejob')

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 26, 2024 at 05:45 PM
+-- Generation Time: Dec 16, 2024 at 08:25 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -72,20 +72,23 @@ INSERT INTO `course` (`id`, `course`) VALUES
 
 CREATE TABLE `event` (
   `id` int(11) NOT NULL,
+  `posted_user` int(1) DEFAULT NULL,
   `event` varchar(255) NOT NULL,
   `schedule` datetime NOT NULL,
   `address` varchar(255) NOT NULL,
   `description` text NOT NULL,
-  `banner` text NOT NULL
+  `banner` text NOT NULL,
+  `isApprove` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `event`
 --
 
-INSERT INTO `event` (`id`, `event`, `schedule`, `address`, `description`, `banner`) VALUES
-(2, 'homecoming', '2024-11-20 13:00:00', 'sport center bago city', 'homecoming batch 2024', '1730297747632.jpeg'),
-(3, 'Reunion', '2024-11-21 12:30:00', 'itech school campos', 'reunion batch 2000', '1730782298708.jpeg');
+INSERT INTO `event` (`id`, `posted_user`, `event`, `schedule`, `address`, `description`, `banner`, `isApprove`) VALUES
+(2, NULL, 'homecoming', '2024-11-20 13:00:00', 'sport center bago city', 'homecoming batch 2024', '1730297747632.jpeg', 1),
+(3, NULL, 'Reunion', '2024-11-21 12:30:00', 'itech school campos', 'reunion batch 2000', '1730782298708.jpeg', 1),
+(10, 14, 'sample', '2024-01-05 01:01:00', 'sample', 'sample', '1734373637885.jpeg', 1);
 
 -- --------------------------------------------------------
 
@@ -116,7 +119,7 @@ INSERT INTO `gallery` (`id`, `caption`, `image`, `date_upload`) VALUES
 
 CREATE TABLE `jobs` (
   `id` int(11) NOT NULL,
-  `posted_user` int(11) NOT NULL,
+  `posted_user` int(11) DEFAULT NULL,
   `company_name` varchar(100) NOT NULL,
   `job_title` varchar(100) NOT NULL,
   `location` varchar(150) NOT NULL,
@@ -124,6 +127,14 @@ CREATE TABLE `jobs` (
   `description` text NOT NULL,
   `datepost` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `jobs`
+--
+
+INSERT INTO `jobs` (`id`, `posted_user`, `company_name`, `job_title`, `location`, `email`, `description`, `datepost`) VALUES
+(20, 14, 'sample', 'sample', 'sample', 'sample@gmail.com', 'sample', '2024-12-16 15:58:02'),
+(27, NULL, 'sample', 'sample', 'sample', 'sample@gmail.com', 'sample', '2024-12-16 22:49:22');
 
 -- --------------------------------------------------------
 
@@ -238,7 +249,8 @@ ALTER TABLE `course`
 -- Indexes for table `event`
 --
 ALTER TABLE `event`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `event_ibfk_1` (`posted_user`);
 
 --
 -- Indexes for table `gallery`
@@ -300,7 +312,7 @@ ALTER TABLE `course`
 -- AUTO_INCREMENT for table `event`
 --
 ALTER TABLE `event`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `gallery`
@@ -312,7 +324,7 @@ ALTER TABLE `gallery`
 -- AUTO_INCREMENT for table `jobs`
 --
 ALTER TABLE `jobs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `participant`
@@ -336,7 +348,7 @@ ALTER TABLE `system_data`
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Constraints for dumped tables
@@ -347,6 +359,12 @@ ALTER TABLE `user`
 --
 ALTER TABLE `accomplishment`
   ADD CONSTRAINT `accomplishment_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `event`
+--
+ALTER TABLE `event`
+  ADD CONSTRAINT `event_ibfk_1` FOREIGN KEY (`posted_user`) REFERENCES `students` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `jobs`

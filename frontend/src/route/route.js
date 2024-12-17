@@ -13,6 +13,7 @@ import profile from './../components/pages/profile_edit.vue'
 import jobs from './../components/pages/jobs.vue'
 import view_job from './../components/pages/view_job.vue'
 import admin_job from './../components/pages/admin_job.vue'
+import event_post from './../components/pages/event_post.vue'
 import system_setting from './../components/pages/admin_systemSetting.vue'
 import about from './../components/pages/about.vue'
 import otp from './../components/pages/otppage.vue'
@@ -136,6 +137,15 @@ const router = createRouter({
                 requiresAuth: true,
             }
         },
+        {
+            path: "/view-event-post", 
+            name: "view-event-post",
+            component: event_post,
+            meta: {
+                requiresAuth: true,
+            }
+        },
+       
         {
             path: "/about", 
             name: "about",

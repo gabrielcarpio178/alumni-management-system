@@ -131,7 +131,7 @@ export default {
                     this.message = 'not found'
                 }
                 this.datas = res.data.ret_alumnu;
-                console.log(res.data.ret_alumnu)
+                // console.log(res.data.ret_alumnu)
             } catch (error) {
                 console.log(error)
             }finally{

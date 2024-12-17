@@ -85,6 +85,7 @@ export default  {
                         status: status,
                         email : email
                     }
+                    // console.log(updateData);
                     try {
                         const res = await axios.put(`${this.PORT}/auth/admin/user_statsUpdate`,
                             updateData,

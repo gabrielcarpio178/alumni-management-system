@@ -93,7 +93,7 @@ export const verification_OTP = async (req, res)=>{
         try {
             const db = await connectToDatabase();
             const hashPassword = await bcrypt.hash(password, 10)
-            await db.query(`INSERT INTO students(firstname, middlename, lastname, gender, birthday, course, batch, contact_num, student_id, email, password) VALUES ('${firstname}','${middlename}','${lastname}','${gender}','${birthday}','${course}', '${batch}', '0${contactnumber}','${student_id}', '${email}','${hashPassword}')`);
+            await db.query(`INSERT INTO students(firstname, middlename, lastname, gender, birthday, course, batch, contact_num, student_id, email, password) VALUES ('${firstname}','${middlename}','${lastname}','${gender}','${birthday}','${course}', '${batch}', '${contactnumber}','${student_id}', '${email}','${hashPassword}')`);
             return res.status(200).json({message: 'success'})
         } catch (error) {
             return res.status(500).json({message: 'server error'})
@@ -199,7 +199,7 @@ export const post_job = async (req, res)=>{
     const {posted_user ,company, job_title, location_data, email ,description} = req.body
     try {
         const db = await connectToDatabase();
-        await db.query(`INSERT INTO jobs(posted_user, company_name, job_title, location, email, description) VALUES ('${posted_user}','${company}','${job_title}','${location_data}', '${email}', '${description}')`);
+        await db.query(`INSERT INTO jobs(posted_user, company_name, job_title, location, email, description) VALUES (?,?,?,?,?,?)`, [posted_user ,company, job_title, location_data, email ,description]);
         return res.status(200).json({message: 'post success'});
     } catch (error) {
         return res.status(500).json({message: 'server error'});
@@ -231,4 +231,18 @@ export const post_event = async (req, res)=>{
     } catch (error) {
         return res.status(500).json({message: 'server error'})
     }
+}
+
+export const addStudentEvent = async (req, res)=>{
+    const {id, event, schedule, description, address} = req.body;
+    const file = req.file.filename;
+
+    try {
+        const db = await connectToDatabase();
+        await db.query(`INSERT INTO event(posted_user, event, schedule, address, description, banner, isApprove) VALUES ('${id}', '${event}', '${schedule}', '${address}','${description}','${file}', 0)`);
+        return res.status(200).json({message: 'post success'});
+    } catch (error) {
+        return res.status(500).json({message: 'server error'})
+    }
+
 }

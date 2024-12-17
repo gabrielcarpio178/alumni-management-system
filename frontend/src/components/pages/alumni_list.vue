@@ -10,6 +10,9 @@
                     <label for="search" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Search</label>
                     <input type="text" name="search" id="search" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search" v-model="this.search" @input="this.getAlumni_data(this.search)" required="">
                 </div>
+                <div v-if="this.isNoPost" class="text-red-600 w-full h-[12vh]">
+                    No Alumni yet
+                </div>
 
                 <div class="text-center dark:text-white text-black" v-if="this.isLoading">
                     Please Wait...
@@ -70,7 +73,8 @@ export default {
     data(){
         return {
             getAlumni: [],
-            isLoading: true
+            isLoading: true,
+            isNoPost: false
         }
     }
     ,
@@ -92,6 +96,7 @@ export default {
                         "authorization" : `bearer ${token}`,
                     }
                 })
+                this.isNoPost = res.data.data_result.length===0;
                 this.getAlumni = res.data.data_result;
             } catch (error) {
                 console.log(error)

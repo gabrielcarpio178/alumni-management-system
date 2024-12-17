@@ -8,7 +8,7 @@
                     Job Opportunity
                 </h1>
                 
-                <router-link to="/jobs/view-job" type="submit" class="w-[22%] md:w-[10%] text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 md:absolute right-5 self-end mr-2 md:mr-0">Your Post</router-link>
+                <router-link to="/jobs/view-job" type="submit" class="w-[22%] md:w-[10%] text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 fixed right-5 self-end mr-2 md:mr-0">Jobs Post</router-link>
                 <div v-if="this.isNoPost" class="text-red-600 w-full h-[40vh]">
                     No Job Post Available
                 </div>
@@ -23,7 +23,7 @@
                                     <img class="rounded-full w-36 h-36 object-center" :src="job.profile_pic===null?getThumbnel(job.firstname, job.lastname):`${this.PORT}/uploads/${job.profile_pic}`" :alt="job.firstname+' '+job.lastname" />
                                 </div>
                                 <div class="text-center capitalize text-2xl font-bold">
-                                    {{job.firstname}} {{job.lastname}}
+                                    {{job.firstname!=job.lastname?job.firstname+' '+job.lastname:job.firstname}}
                                 </div>
                             </div>
                             <div>
@@ -83,19 +83,28 @@
                 return moment(date).format('MMM. D, YYYY');
             },
             getThumbnel(firstname, lastname){
-                return `https://ui-avatars.com/api/?name=${firstname}+${lastname}`
+                if(firstname!=lastname){
+                    return `https://ui-avatars.com/api/?name=${firstname}+${lastname}`
+                }else{
+                    return `https://ui-avatars.com/api/?name=${firstname}`
+                }
             },
             async getData(){
                 const token = localStorage.getItem('token');
                 const id = JSON.parse(localStorage.getItem('student')).id
                 try {
-                    const res = await axios.get(`${this.PORT}/auth/jobs/${id}`,{
+                    const res = await axios.get(`${this.PORT}/auth/admin/jobs`,{
                         headers:{
                             'Content-type':'application/x-www-form-urlencoded',
                             "authorization" : `bearer ${token}`,
                         }
                     })
                     this.isNoPost = res.data.rows.length===0
+                    for(let i in res.data.rows){
+                        if(res.data.rows[i].posted_user==id){
+                            res.data.rows.splice(i, 1);
+                        }
+                    }
                     this.jobs = res.data.rows
                 } catch (error) {
                     console.log(error);

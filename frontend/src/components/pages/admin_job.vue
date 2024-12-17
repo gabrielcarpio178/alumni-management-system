@@ -5,7 +5,13 @@
         <div class="flex flex-col w-full">
             <Navbar/>
             <div class="overflow-x-hidden mt-14 md:w-[78%] md:mt-[5%] md:ml-[20.5%] dark:text-white animate__animated animate__fadeIn px-2 md:pl-4 md:px-4 -z-1">
-                <h1 class="text-3xl pb-4 tracking-tight text-gray-900 dark:text-white  font-bold">Jobs</h1>
+                <div class="flex justify-between items-center">
+                    <h1 class="text-3xl pb-4 tracking-tight text-gray-900 dark:text-white  font-bold">Jobs</h1>
+                    <div class="md:w-[20%]">
+                        <button class="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 uppercase"  @click="show_form">Post Job</button>
+                    </div>
+                </div>
+                
                 <div class="text-2xl text-red-600" v-if="this.message">No Jobs Posted</div>
                 <div v-if="this.loadingContent" class="w-full flex items-center justify-center">
                     Please Wait...
@@ -20,7 +26,7 @@
                                             <img class="shadow rounded-full w-36 h-36 object-center" :src="job.profile_pic===null?getThumbnel(job.firstname, job.lastname):`${this.PORT}/uploads/${job.profile_pic}`" :alt="job.firstname+' '+job.lastname" />
                                         </div>
                                         <div class="text-center capitalize text-2xl font-bold">
-                                            {{job.firstname}} {{job.lastname}}
+                                            {{job.firstname!=job.lastname?job.firstname+' '+job.lastname:job.firstname}}
                                         </div>
                                     </div>
                                     <div>
@@ -45,7 +51,8 @@
                 </div>
             </div>    
         </div> 
-        <ViewJobs v-if="isShow_Jobs" class="animate__animated animate__bounceInDown" v-bind:job='job' @callremovejob="removejobs" @getNewData="getData" @loading="nowLoading"/>   
+        <ViewJobs v-if="isShow_Jobs" class="animate__animated animate__bounceInDown" v-bind:job='job' @callremovejob="removejobs" @getNewData="getData" @loading="nowLoading"/> 
+        <PostJobs v-if="isShow_form" class="animate__animated animate__bounceInDown" @callremove="removejobs_form" @loading="nowLoading" @getNewData="getdata"/>   
     </div>    
 </template>
 
@@ -56,13 +63,15 @@ import Navbar from './../layout/admin_navbar.vue'
 import axios from 'axios';
 import moment from 'moment';
 import ViewJobs from './viewJob.vue'
+import PostJobs from './post_jobs.vue'
 
 export default {
     components: {
         Adminheader,
         Navbar,
         ViewJobs,
-        Loader
+        Loader,
+        PostJobs
     },
     data(){
         return{
@@ -71,15 +80,22 @@ export default {
             isShow_Jobs: false,
             isLoader : 'loader-hide',
             message: false,
-            loadingContent: true
+            loadingContent: true,
+            isShow_form: false
         }
     },
     mounted(){
         this.getData();
+        // console.log(JSON.parse(localStorage.getItem('student')))
     },
     methods:{
         getThumbnel(firstname, lastname){
-            return `https://ui-avatars.com/api/?name=${firstname}+${lastname}`
+            if(firstname!=lastname){
+                return `https://ui-avatars.com/api/?name=${firstname}+${lastname}`
+            }else{
+                return `https://ui-avatars.com/api/?name=${firstname}`
+            }
+           
         },
         moment: function (date) {
             return moment(date).format('MMM. D, YYYY');
@@ -118,7 +134,15 @@ export default {
         },
         removejobs(){
             this.isShow_Jobs = false;
-        }
+        },
+        show_form(){
+            this.isShow_form = true;
+        },
+        removejobs_form(){
+            this.isShow_form = false;
+        },
+
+
     }
 
 }

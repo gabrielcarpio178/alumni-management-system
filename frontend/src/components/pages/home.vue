@@ -4,6 +4,7 @@
         <Participants v-if="this.isParticipant" v-bind:loadingParticipant="loadingParticipant" v-bind:participants="participants" v-bind:event_id="event_id" v-bind:isAlreadyParticipate="isAlreadyParticipate" class="animate__animated animate__bounceInDown" @remove="remove" @loading="nowLoading"/>
         <Loader v-bind:isLoader='isLoader'/>
         <div class="h-screen xl:h-full dark:text-white w-screen animate__animated animate__fadeIn">
+            <router-link to="/view-event-post" type="submit" class="w-[22%] md:w-[10%] text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 fixed md:top-24 top-20 right-5 self-end mr-2 md:mr-0">Event Post</router-link>
             <div class="text-center w-screen pt-32 flex flex-col gap-2">
                 <h1 class="text-3xl font-bold">
                     Welcome Alumni

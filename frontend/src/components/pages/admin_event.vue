@@ -43,7 +43,7 @@
                                 <div class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 text-sm h-16 overflow-y-scroll">{{event.description}}</div>
                             </div>
                             <div class="flex gap-x-2 mt-2">
-                                <!-- <button class="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" @click="editGallery(index)">Edit</button> -->
+                                <button class="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" @click="updateIsapprove(event.id)" v-if="event.isApprove===0">Accept</button>
                                 <button class="w-full text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800" @click="delateEvent(event.id)">Delete</button>
                             </div>
                         </div>
@@ -154,6 +154,52 @@ export default {
                             position: "center",
                             title: `Delete`,
                             text: `Delete success`,
+                            showConfirmButton: false,
+                            timer: 1000,
+                            icon: "success"
+                        }).then(()=>{
+                            this.getGallery('all');
+                            this.filter_schedule = ""
+                        });
+                    }
+                }catch(err){
+                    console.log(err)
+                }finally{
+                    this.nowLoading();
+                }
+            }
+            });
+        },
+        updateIsapprove(id){
+            const token = localStorage.getItem('token');
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You went to accept",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, accept it!"
+            }).then(async (result) => {
+            if (result.isConfirmed) { 
+                this.nowLoading();
+                try{
+                    var res = await axios.put(`${this.PORT}/auth/admin/acceptEvent`,
+                        {
+                            id, 
+                        },
+                        {
+                            headers:{
+                                'Content-type':'application/x-www-form-urlencoded',
+                                "authorization" : `bearer ${token}`,
+                            }
+                        }
+                    );
+                    if(res.data.message=='update success'){
+                        Swal.fire({
+                            position: "center",
+                            title: `Update`,
+                            text: `Update success`,
                             showConfirmButton: false,
                             timer: 1000,
                             icon: "success"

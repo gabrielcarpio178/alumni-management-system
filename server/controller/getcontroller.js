@@ -81,7 +81,7 @@ export const alumnilist_search = async (req, res)=>{
         let temp_id = 0;
         rows.forEach(row => {
             if(row.id!==temp_id){
-                ret_alumnu.push({firstname:row.firstname, middlename:row.middlename, lastname:row.lastname, gender:row.gender, batch:row.batch, contact_num:row.contact_num, profile_pic:row.profile_pic, student_id:row.student_id, course_name:row.course_name, email:row.email, status:row.status,accomplishments: [row.accomplishment]})
+                ret_alumnu.push({id:row.id, firstname:row.firstname, middlename:row.middlename, lastname:row.lastname, gender:row.gender, batch:row.batch, contact_num:row.contact_num, profile_pic:row.profile_pic, student_id:row.student_id, course_name:row.course_name, email:row.email, status:row.status,accomplishments: [row.accomplishment]})
             }else{
                 ret_alumnu[ret_alumnu.length-1].accomplishments.push(row.accomplishment)
             }
@@ -112,7 +112,7 @@ export const job_id = async (req, res)=>{
     const id = req.params.id;
     try {
         const db = await connectToDatabase();
-        const [rows] = await db.query(`SELECT a.contact_num ,j.posted_user, a.profile_pic ,a.firstname, a.middlename, a.lastname, j.company_name, j.job_title, j.location, j.email, j.description, j.datepost FROM jobs AS j INNER JOIN students AS a ON j.posted_user = a.id WHERE j.posted_user != ${id} ORDER BY j.id DESC`);
+        const [rows] = await db.query(`SELECT j.id, IFNULL(a.contact_num, (SELECT contact_number FROM system_data)) AS contact_num ,IFNULL(j.posted_user, 0) AS posted_user, a.profile_pic , IFNULL(a.firstname,'admin') AS firstname, IFNULL(a.middlename,'admin') AS middlename, IFNULL(a.lastname,'admin') AS lastname, j.company_name, j.job_title, j.location, j.email, j.description, j.datepost FROM jobs AS j LEFT JOIN students AS a ON j.posted_user = a.id WHERE j.posted_user != ${id} ORDER BY j.id DESC`);
         return res.status(200).json({rows});
     } catch (error) {
         return res.status(500).json({message: 'server error'});
@@ -156,10 +156,26 @@ export const get_gallery = async (req, res)=>{
 export const admin_job = async (req, res)=>{
     try {
         const db = await connectToDatabase();
-        const [rows] = await db.query(`SELECT j.id, a.contact_num ,j.posted_user, a.profile_pic ,a.firstname, a.middlename, a.lastname, j.company_name, j.job_title, j.location, j.email, j.description, j.datepost FROM jobs AS j INNER JOIN students AS a ON j.posted_user = a.id ORDER BY j.id DESC`);
+        const [rows] = await db.query(`SELECT j.id, IFNULL(a.contact_num, (SELECT contact_number FROM system_data)) AS contact_num ,IFNULL(j.posted_user, 0) AS posted_user, a.profile_pic , IFNULL(a.firstname,'system') AS firstname, IFNULL(a.middlename,'admin') AS middlename, IFNULL(a.lastname,'admin') AS lastname, j.company_name, j.job_title, j.location, j.email, j.description, j.datepost FROM jobs AS j LEFT JOIN students AS a ON j.posted_user = a.id ORDER BY j.id DESC;`);
         return res.status(200).json({rows});
     } catch (error) {
         return res.status(500).json({message: 'server error'});
+    }
+}
+
+export const student_event = async (req, res)=>{
+    const {id, filter} = req.params;
+    console.log(id, filter);
+    let sql = `SELECT * FROM event WHERE posted_user = '${id}' ORDER BY id DESC`; 
+    if(filter!=='all'){
+        sql = `SELECT * FROM event WHERE posted_user = '${id}' AND CAST(schedule AS date) LIKE '${filter}' ORDER BY schedule DESC`; 
+    }
+    try {
+        const db = await connectToDatabase();
+        const [rows] = await db.query(sql);
+        return res.status(200).json({rows});
+    } catch (error) {
+        return res.status(500).json({message: 'server error'})
     }
 }
 
@@ -201,7 +217,7 @@ export const system_setting = async (req, res)=>{
 export const events = async (req, res)=>{
     try {
         const db = await connectToDatabase();
-        const [rows] = await db.query('SELECT * FROM event');
+        const [rows] = await db.query('SELECT * FROM event ORDER BY id DESC');
         return res.status(200).json({rows});
     } catch (error) {
         return res.status(500).json({message: 'server error'});

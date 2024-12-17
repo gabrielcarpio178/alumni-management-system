@@ -63,7 +63,7 @@ export default{
         async addPost(e){
             e.preventDefault();
             const token = localStorage.getItem('token');
-            const id = JSON.parse(localStorage.getItem('student')).id;
+            const id = JSON.parse(localStorage.getItem('student'))!=null?JSON.parse(localStorage.getItem('student')).id:null;
             this.loading();
             try {
                 var res = await axios.post(`${this.PORT}/auth/jobs/post`,
@@ -98,11 +98,12 @@ export default{
                 });
             }
             } catch (error) {
-                consol.log(error);
+                console.log(error);
             } finally{
                 this.$emit('getNewData')
                 this.loading();
                 this.callremove(); 
+                location.reload();
             }
         },
 

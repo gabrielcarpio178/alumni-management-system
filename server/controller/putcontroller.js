@@ -86,3 +86,14 @@ export const admin_accont = async (req, res)=>{
         return res.status(500).json({message: 'server error'});
     }
 }
+
+export const acceptedEvent = async (req, res)=>{
+    const id = req.body.id;
+    try {
+        const db = await connectToDatabase();
+        await db.query("UPDATE `event` SET `isApprove`= 1 WHERE `id`= ?",[id]);
+        return res.status(200).json({message: 'update success'});
+    } catch (error) {
+        return res.status(500).json({message: 'server error'});
+    }
+}

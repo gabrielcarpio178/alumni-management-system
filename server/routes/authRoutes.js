@@ -1,9 +1,9 @@
 import express from 'express'
 import {upload} from '../lib/multer_lib.js'
 import { verifyToken } from '../middleware/verifyToken.js'
-import { login, register, resendOTP, verification_OTP, addAccomplishment,add_course, update_profile, alumni, post_job, post_gallery, post_event } from '../controller/postcontroller.js'
-import { course, student_id, alumnilist_search, participant_id, job_id, job_id_user, admin_home, get_gallery, admin_job, event_filter, get_admin_accont, system_setting, events, getAccomplishment, getAlumni } from '../controller/getcontroller.js'
-import { edit_course, user_statsUpdate, edit_job, system_setting_update, admin_accont, editAccomplishment } from '../controller/putcontroller.js'
+import { login, register, resendOTP, verification_OTP, addAccomplishment,add_course, update_profile, alumni, post_job, post_gallery, post_event, addStudentEvent } from '../controller/postcontroller.js'
+import { course, student_id, alumnilist_search, participant_id, job_id, job_id_user, admin_home, get_gallery, admin_job, event_filter, get_admin_accont, system_setting, events, getAccomplishment, getAlumni, student_event } from '../controller/getcontroller.js'
+import { edit_course, user_statsUpdate, edit_job, system_setting_update, admin_accont, editAccomplishment, acceptedEvent } from '../controller/putcontroller.js'
 import { delete_course, delete_participant, delete_job, deleleGallery, deleteEvent, deleteReq, deleteAccomplishment } from '../controller/deletecontroller.js'
 
 const router = express.Router();
@@ -19,6 +19,10 @@ router.post('/login', login);
 router.get('/course/:search', course)
 
 router.get('/student/:id', verifyToken, student_id)
+
+router.get('/student/events/:filter/:id', verifyToken, student_event);
+
+router.post('/student/event_add', verifyToken, upload.single("file"), addStudentEvent)
 
 router.get('/student/accomplishment/:id', verifyToken, getAccomplishment)
 
@@ -85,5 +89,7 @@ router.put('/admin/system_setting', verifyToken, system_setting_update)
 router.put('/admin/account', verifyToken, admin_accont)
 
 router.get('/events', events)
+
+router.put('/admin/acceptEvent', verifyToken, acceptedEvent)
 
 export default router;
