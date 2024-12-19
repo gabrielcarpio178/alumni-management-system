@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 16, 2024 at 08:25 PM
+-- Generation Time: Dec 17, 2024 at 06:34 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -33,16 +33,6 @@ CREATE TABLE `accomplishment` (
   `accomplishment` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `accomplishment`
---
-
-INSERT INTO `accomplishment` (`id`, `student_id`, `accomplishment`) VALUES
-(1, 14, 'Best in programmer'),
-(2, 14, 'programmer of the year'),
-(3, 14, 'Best in Capstone award'),
-(4, 14, 'Green IT award');
-
 -- --------------------------------------------------------
 
 --
@@ -60,7 +50,6 @@ CREATE TABLE `course` (
 
 INSERT INTO `course` (`id`, `course`) VALUES
 (1, 'BSIS'),
-(2, 'BSIT'),
 (27, 'BSED'),
 (28, 'COMSCIE');
 
@@ -88,7 +77,7 @@ CREATE TABLE `event` (
 INSERT INTO `event` (`id`, `posted_user`, `event`, `schedule`, `address`, `description`, `banner`, `isApprove`) VALUES
 (2, NULL, 'homecoming', '2024-11-20 13:00:00', 'sport center bago city', 'homecoming batch 2024', '1730297747632.jpeg', 1),
 (3, NULL, 'Reunion', '2024-11-21 12:30:00', 'itech school campos', 'reunion batch 2000', '1730782298708.jpeg', 1),
-(10, 14, 'sample', '2024-01-05 01:01:00', 'sample', 'sample', '1734373637885.jpeg', 1);
+(15, 17, 'sample', '2000-04-04 01:01:00', 'sample', 'sample', '1734413157585.jpeg', 0);
 
 -- --------------------------------------------------------
 
@@ -133,7 +122,6 @@ CREATE TABLE `jobs` (
 --
 
 INSERT INTO `jobs` (`id`, `posted_user`, `company_name`, `job_title`, `location`, `email`, `description`, `datepost`) VALUES
-(20, 14, 'sample', 'sample', 'sample', 'sample@gmail.com', 'sample', '2024-12-16 15:58:02'),
 (27, NULL, 'sample', 'sample', 'sample', 'sample@gmail.com', 'sample', '2024-12-16 22:49:22');
 
 -- --------------------------------------------------------
@@ -147,13 +135,6 @@ CREATE TABLE `participant` (
   `event_id` int(11) NOT NULL,
   `student_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `participant`
---
-
-INSERT INTO `participant` (`id`, `event_id`, `student_id`) VALUES
-(17, 2, 10);
 
 -- --------------------------------------------------------
 
@@ -183,10 +164,7 @@ CREATE TABLE `students` (
 --
 
 INSERT INTO `students` (`id`, `firstname`, `middlename`, `lastname`, `gender`, `birthday`, `course`, `batch`, `contact_num`, `profile_pic`, `student_id`, `status`, `email`, `password`) VALUES
-(8, 'kian', 'none', 'sadio', 'female', '2000-02-02', 1, '2024', '09412313129', NULL, '20204391021', 0, 'kian@gmail.com', '$2b$10$TNwGDF5eCyaiZAyFbEuXh.HhJj16UkJdWdV3PfP93IEX87RpBe9Vu'),
-(9, 'kenny', 'none', 'belarti', 'female', '2000-11-11', 28, '2024', '09473829471', NULL, '20204937584', 1, 'kenny@gmail.com', '$2b$10$AwslS5DWG9mOC5PYhRY1auxanSpPpuoQBwl6R1ElZHFFYnpT7VsRO'),
-(10, 'andrew', 'carpio', 'tooc', 'male', '2000-10-20', 2, '2024', '09241375684', NULL, '20241239032', 1, 'andrewtooc@gmail.com', '$2b$10$RWBE2atnAtaFEdkodyD1we2G6tt9cvZ0PalZhSJ4QH4Maog25NaOC'),
-(14, 'gabriel', 'hulear', 'carpio', 'male', '1998-05-01', 1, '2024', '09708038647', NULL, '20204938191', 1, 'gabrielcarpio178@gmail.com', '$2b$10$hJjDL3WjEoITFgXfc4Qk3.VzMr/PKLfvNvkGPs4NzuNxD.8UjM9H6');
+(17, 'sample', 'sample', 'sample', 'male', '2000-05-01', 1, '2024', '9123456789', NULL, '20240293012', 1, 'sample@gmail.com', '$2b$10$.OzV7pnMFZwpUWi.nJkVfu/MihFNzt36tLwzm4CSi2eZmLoH1BWKu');
 
 -- --------------------------------------------------------
 
@@ -312,7 +290,7 @@ ALTER TABLE `course`
 -- AUTO_INCREMENT for table `event`
 --
 ALTER TABLE `event`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `gallery`
@@ -324,7 +302,7 @@ ALTER TABLE `gallery`
 -- AUTO_INCREMENT for table `jobs`
 --
 ALTER TABLE `jobs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `participant`
@@ -336,7 +314,7 @@ ALTER TABLE `participant`
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `system_data`
@@ -358,13 +336,13 @@ ALTER TABLE `user`
 -- Constraints for table `accomplishment`
 --
 ALTER TABLE `accomplishment`
-  ADD CONSTRAINT `accomplishment_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `accomplishment_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `event`
 --
 ALTER TABLE `event`
-  ADD CONSTRAINT `event_ibfk_1` FOREIGN KEY (`posted_user`) REFERENCES `students` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  ADD CONSTRAINT `event_ibfk_1` FOREIGN KEY (`posted_user`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `jobs`
@@ -383,7 +361,7 @@ ALTER TABLE `participant`
 -- Constraints for table `students`
 --
 ALTER TABLE `students`
-  ADD CONSTRAINT `students_ibfk_1` FOREIGN KEY (`course`) REFERENCES `course` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  ADD CONSTRAINT `students_ibfk_1` FOREIGN KEY (`course`) REFERENCES `course` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
