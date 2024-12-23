@@ -37,17 +37,17 @@ export const user_statsUpdate = async (req, res)=>{
     }
 }
 
-export const editAccomplishment = async (req, res)=>{
-    const {id, accomplishment} = req.body;
+export const editaccomplestment = async (req, res)=>{
+    const {student_id, columnName, status} = req.body;
+    const sql = `UPDATE accomplishment SET ${columnName} = ${status} WHERE student_id = ${student_id}`;
     try {
         const db = await connectToDatabase();
-        await db.query(`UPDATE accomplishment SET accomplishment='${accomplishment}' WHERE id = ${id}`);
-        return res.status(200).json({message: 'update success'});
+        await db.query(sql);
+        return res.status(200).json({message: 'update success', columnName, status});
     } catch (error) {
-        return res.status(500).json({message: 'server error'});
+        return res.status(500).json({message: 'server error'})
     }
 }
-
 
 export const edit_job =  async (req, res)=>{
     const {id, company_name, job_title, location, email, description} = req.body;
@@ -92,6 +92,17 @@ export const acceptedEvent = async (req, res)=>{
     try {
         const db = await connectToDatabase();
         await db.query("UPDATE `event` SET `isApprove`= 1 WHERE `id`= ?",[id]);
+        return res.status(200).json({message: 'update success'});
+    } catch (error) {
+        return res.status(500).json({message: 'server error'});
+    }
+}
+
+export const updateEmplyomentStat = async (req, res)=>{
+    const {isEmployed, student_id} = req.body;
+    try {
+        const db = await connectToDatabase();
+        await db.query("UPDATE `students` SET `isEmployed`= ? WHERE `id`= ?",[isEmployed, student_id]);
         return res.status(200).json({message: 'update success'});
     } catch (error) {
         return res.status(500).json({message: 'server error'});

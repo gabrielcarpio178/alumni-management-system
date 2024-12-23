@@ -34,7 +34,7 @@ export const getAccomplishment = async (req, res)=>{
     const id = req.params.id;
     try {
         const db = await connectToDatabase();
-        const [accomplishments] = await db.query(`SELECT a.id ,a.accomplishment FROM accomplishment AS a WHERE student_id = '${id}'`)
+        const [accomplishments] = await db.query(`SELECT a.id , a.isMasteral, a.isDoctorate FROM accomplishment AS a WHERE student_id = '${id}'`)
         return res.status(200).json({accomplishments});
     } catch (error) {
         return res.status(500).json(error.message)
@@ -68,10 +68,10 @@ export const getAlumni =  async (req, res)=>{
 
 export const alumnilist_search = async (req, res)=>{
     const search = req.params.search;
-    let sql = "SELECT s.*, c.course as course_name, a.accomplishment FROM course AS c INNER JOIN students AS s ON s.course = c.id LEFT JOIN accomplishment AS a ON a.student_id = s.id ORDER BY s.id DESC";
+    let sql = "SELECT s.*, c.course as course_name, a.isMasteral, a.isDoctorate FROM course AS c INNER JOIN students AS s ON s.course = c.id LEFT JOIN accomplishment AS a ON a.student_id = s.id ORDER BY s.id DESC";
     
     if(search!=='all'){
-        sql = `SELECT s.*, c.course as course_name, a.accomplishment FROM course AS c INNER JOIN students AS s ON s.course = c.id LEFT JOIN accomplishment AS a ON a.student_id = s.id WHERE s.firstname LIKE '%${search}%' OR s.middlename LIKE '%${search}%' OR s.lastname LIKE '%${search}%' OR s.student_id LIKE '%${search}%' ORDER BY s.id DESC`;
+        sql = `SELECT s.*, c.course as course_name, a.isMasteral, a.isDoctorate FROM course AS c INNER JOIN students AS s ON s.course = c.id LEFT JOIN accomplishment AS a ON a.student_id = s.id WHERE s.firstname LIKE '%${search}%' OR s.middlename LIKE '%${search}%' OR s.lastname LIKE '%${search}%' OR s.student_id LIKE '%${search}%' ORDER BY s.id DESC`;
     }
     try {
         const db = await connectToDatabase();
@@ -222,4 +222,58 @@ export const events = async (req, res)=>{
     } catch (error) {
         return res.status(500).json({message: 'server error'});
     }
+}
+
+
+export const reportGraph = async (req, res)=>{
+    try {
+        const db = await connectToDatabase();
+
+        const [employedByBatch] = await db.query('SELECT batch, SUM(isEmployed) AS bybatchtotal_employed, (COUNT(batch)-SUM(isEmployed)) AS bybatchtotal_unemployed FROM students WHERE status = 1 GROUP BY batch;');
+
+        const [masteralByBatch] = await db.query('SELECT s.batch ,SUM(a.isMasteral) AS total_bybatchMasteral, SUM(a.isDoctorate) AS total_bybatchDoctorate FROM accomplishment AS a INNER JOIN students AS s ON s.id = a.student_id WHERE s.status = 1 GROUP BY s.batch;');
+        
+        return res.status(200).json({employedByBatch, masteralByBatch})
+    } catch (error) {
+        return res.status(500).json({message: 'server error'});
+    }
+}
+
+export const reportDataMasteral = async (req, res)=>{
+    const batch = req.params.batch;
+    let sql = "";
+    if(batch==="all"){
+        sql = 'SELECT s.firstname, s.lastname, c.course, s.batch, IF(s.isEmployed = 1, "employed","unemployed") AS employment_status, IF(a.isMasteral = 1, "masteral", "not masteral") AS masteral, IF(a.isDoctorate = 1, "doctorate", "not doctorate") AS doctorate FROM students AS s INNER JOIN accomplishment AS a ON s.id = a.student_id INNER JOIN course AS c ON c.id = s.course WHERE s.status = 1 ORDER BY s.batch DESC;';
+    }else{
+        sql = `SELECT s.firstname, s.lastname, c.course, s.batch, IF(s.isEmployed = 1, "employed","unemployed") AS employment_status, IF(a.isMasteral = 1, "masteral", "not masteral") AS masteral, IF(a.isDoctorate = 1, "doctorate", "not doctorate") AS doctorate FROM students AS s INNER JOIN accomplishment AS a ON s.id = a.student_id INNER JOIN course AS c ON c.id = s.course WHERE s.status = 1 AND s.batch = ${batch} ORDER BY s.batch DESC;`;
+    }
+
+    try {
+        const db = await connectToDatabase();
+        const [rows] = await db.query(sql);
+        return res.status(200).json({rows})
+    } catch (error) {
+        return res.status(500).json({message: 'server error'});
+    }
+}
+
+export const reportDataEmployment = async (req, res)=>{
+
+    const status = req.params.status;
+    let sql = "";
+    if(status==="all"){
+        sql = 'SELECT s.firstname, s.lastname, c.course, s.batch, IF(s.isEmployed = 1, "employed","unemployed") AS employment_status, IF(a.isMasteral = 1, "masteral", "not masteral") AS masteral, IF(a.isDoctorate = 1, "doctorate", "not doctorate") AS doctorate FROM students AS s INNER JOIN accomplishment AS a ON s.id = a.student_id INNER JOIN course AS c ON c.id = s.course WHERE s.status = 1 ORDER BY s.batch DESC;';
+    }else{
+        sql = `SELECT s.firstname, s.lastname, c.course, s.batch, IF(s.isEmployed = 1, "employed","unemployed") AS employment_status, IF(a.isMasteral = 1, "masteral", "not masteral") AS masteral, IF(a.isDoctorate = 1, "doctorate", "not doctorate") AS doctorate FROM students AS s INNER JOIN accomplishment AS a ON s.id = a.student_id INNER JOIN course AS c ON c.id = s.course WHERE s.status = 1 AND s.isEmployed = ${status} ORDER BY s.id DESC;`;
+    }
+
+    try {
+        const db = await connectToDatabase();
+        const [rows] = await db.query(sql);
+        return res.status(200).json({rows})
+    } catch (error) {
+        return res.status(500).json({message: 'server error'});
+    }
+
+
 }

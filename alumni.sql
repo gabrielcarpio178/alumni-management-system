@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 17, 2024 at 06:34 AM
+-- Generation Time: Dec 23, 2024 at 07:10 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -30,8 +30,22 @@ SET time_zone = "+00:00";
 CREATE TABLE `accomplishment` (
   `id` int(11) NOT NULL,
   `student_id` int(11) NOT NULL,
-  `accomplishment` varchar(50) NOT NULL
+  `isMasteral` tinyint(1) NOT NULL DEFAULT 0,
+  `isDoctorate` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `accomplishment`
+--
+
+INSERT INTO `accomplishment` (`id`, `student_id`, `isMasteral`, `isDoctorate`) VALUES
+(5, 17, 0, 1),
+(6, 18, 0, 1),
+(7, 19, 1, 1),
+(8, 20, 1, 0),
+(9, 21, 0, 0),
+(10, 22, 0, 0),
+(11, 26, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -154,6 +168,7 @@ CREATE TABLE `students` (
   `contact_num` varchar(100) NOT NULL,
   `profile_pic` text DEFAULT NULL,
   `student_id` varchar(255) NOT NULL,
+  `isEmployed` tinyint(1) NOT NULL DEFAULT 0,
   `status` tinyint(1) NOT NULL DEFAULT 0,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL
@@ -163,8 +178,22 @@ CREATE TABLE `students` (
 -- Dumping data for table `students`
 --
 
-INSERT INTO `students` (`id`, `firstname`, `middlename`, `lastname`, `gender`, `birthday`, `course`, `batch`, `contact_num`, `profile_pic`, `student_id`, `status`, `email`, `password`) VALUES
-(17, 'sample', 'sample', 'sample', 'male', '2000-05-01', 1, '2024', '9123456789', NULL, '20240293012', 1, 'sample@gmail.com', '$2b$10$.OzV7pnMFZwpUWi.nJkVfu/MihFNzt36tLwzm4CSi2eZmLoH1BWKu');
+INSERT INTO `students` (`id`, `firstname`, `middlename`, `lastname`, `gender`, `birthday`, `course`, `batch`, `contact_num`, `profile_pic`, `student_id`, `isEmployed`, `status`, `email`, `password`) VALUES
+(17, 'sample', 'sample', 'sample', 'male', '2000-05-01', 1, '2024', '9123456789', NULL, '20240293012', 0, 1, 'sample@gmail.com', '$2b$10$.OzV7pnMFZwpUWi.nJkVfu/MihFNzt36tLwzm4CSi2eZmLoH1BWKu'),
+(18, 'gabriel', 'huelar', 'carpio', 'male', '2000-05-01', 1, '2023', '9123456758', NULL, '20240293028', 1, 1, 'gabrielcarpio@gmail.com', '$2b$10$.OzV7pnMFZwpUWi.nJkVfu/MihFNzt36tLwzm4CSi2eZmLoH1BWKu'),
+(19, 'andrew', 'carpio', 'tooc', 'male', '2000-06-17', 27, '2023', '9123456767', NULL, '20240293010', 1, 1, 'andrew@gmail.com', '$2b$10$.OzV7pnMFZwpUWi.nJkVfu/MihFNzt36tLwzm4CSi2eZmLoH1BWKu'),
+(20, 'juan', 'dela', 'cruz', 'female', '1997-06-26', 1, '2010', '9123456789', NULL, '20240293039', 0, 1, 'jaun@gmail.com', '$2b$10$.OzV7pnMFZwpUWi.nJkVfu/MihFNzt36tLwzm4CSi2eZmLoH1BWKu'),
+(21, 'john', 'dou', 'dei', 'female', '1997-06-26', 1, '2010', '9123456720', NULL, '20240293032', 0, 0, 'john@gmail.com', '$2b$10$.OzV7pnMFZwpUWi.nJkVfu/MihFNzt36tLwzm4CSi2eZmLoH1BWKu'),
+(22, 'angela', 'dimagiba', 'montenegro', 'female', '2005-05-20', 27, '2024', '09231654798', NULL, '20240293015', 0, 0, 'angela@gmail.com', '$2b$10$LlL1V9EFGLPjM2bnn9sKjucdfYyRqoo5x7vh4vdMwv.RC2KJQc0bW'),
+(26, 'alucard', 'dracon', 'vampire', 'male', '1999-11-01', 27, '2023', '09123456798', NULL, '20240293078', 1, 0, 'gabrielcarpio178@gmail.com', '$2b$10$rX4VeA3aeysFNYBlYk9xLeJl0e0GnAqPmSGlbpoQ5vIyRKISd4ZVq');
+
+--
+-- Triggers `students`
+--
+DELIMITER $$
+CREATE TRIGGER `insertAccomplistment` AFTER INSERT ON `students` FOR EACH ROW INSERT INTO `accomplishment`(`student_id`, `isMasteral`, `isDoctorate`) VALUES (NEW.id,0,0)
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -278,7 +307,7 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `accomplishment`
 --
 ALTER TABLE `accomplishment`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `course`
@@ -314,7 +343,7 @@ ALTER TABLE `participant`
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `system_data`

@@ -1,9 +1,9 @@
 import express from 'express'
 import {upload} from '../lib/multer_lib.js'
 import { verifyToken } from '../middleware/verifyToken.js'
-import { login, register, resendOTP, verification_OTP, addAccomplishment,add_course, update_profile, alumni, post_job, post_gallery, post_event, addStudentEvent } from '../controller/postcontroller.js'
-import { course, student_id, alumnilist_search, participant_id, job_id, job_id_user, admin_home, get_gallery, admin_job, event_filter, get_admin_accont, system_setting, events, getAccomplishment, getAlumni, student_event } from '../controller/getcontroller.js'
-import { edit_course, user_statsUpdate, edit_job, system_setting_update, admin_accont, editAccomplishment, acceptedEvent } from '../controller/putcontroller.js'
+import { login, register, resendOTP, verification_OTP,add_course, update_profile, alumni, post_job, post_gallery, post_event, addStudentEvent } from '../controller/postcontroller.js'
+import { course, student_id, alumnilist_search, participant_id, job_id, job_id_user, admin_home, get_gallery, admin_job, event_filter, get_admin_accont, system_setting, events, getAccomplishment, getAlumni, student_event, reportGraph, reportDataMasteral, reportDataEmployment } from '../controller/getcontroller.js'
+import { edit_course, user_statsUpdate, edit_job, system_setting_update, admin_accont, acceptedEvent, updateEmplyomentStat, editaccomplestment } from '../controller/putcontroller.js'
 import { delete_course, delete_participant, delete_job, deleleGallery, deleteEvent, deleteReq, deleteAccomplishment } from '../controller/deletecontroller.js'
 
 const router = express.Router();
@@ -26,9 +26,7 @@ router.post('/student/event_add', verifyToken, upload.single("file"), addStudent
 
 router.get('/student/accomplishment/:id', verifyToken, getAccomplishment)
 
-router.post('/student/addAccomplishment', verifyToken, addAccomplishment)
-
-router.put('/student/editAccomplishment', verifyToken, editAccomplishment)
+router.post('/studen', verifyToken)
 
 router.delete('/student/deleteAccomplishment', verifyToken, deleteAccomplishment)
 
@@ -91,5 +89,15 @@ router.put('/admin/account', verifyToken, admin_accont)
 router.get('/events', events)
 
 router.put('/admin/acceptEvent', verifyToken, acceptedEvent)
+
+router.put('/student/employment', verifyToken, updateEmplyomentStat);
+
+router.put('/student/editaccomplestment', verifyToken, editaccomplestment)
+
+router.get('/admin/repots/graph', verifyToken, reportGraph);
+
+router.get('/admin/reportDataMasteral/:batch', verifyToken, reportDataMasteral);
+
+router.get('/admin/reportDataEmployed/:status', verifyToken, reportDataEmployment);
 
 export default router;

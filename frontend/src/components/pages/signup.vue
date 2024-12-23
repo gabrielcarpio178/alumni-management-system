@@ -46,10 +46,21 @@
                                 </select>
                             </div>
                             <div>
-                                <label for="batch" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white capitalize">batch</label>
-                                 <select name="batch" v-model="batch" id="batch" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
-                                    <option v-for="(year, index) in this.years" :key="index" :value="year">{{year}}</option>
-                                </select>
+                                <div class="w-full flex flex-row gap-x-2">
+                                    <div class="w-1/2">
+                                        <label for="batch" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white capitalize">batch</label>
+                                        <select name="batch" v-model="batch" id="batch" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                                            <option v-for="(year, index) in this.years" :key="index" :value="year">{{year}}</option>
+                                        </select>
+                                    </div>
+                                    <div class="w-1/2">
+                                        <label for="employmentStatus" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white capitalize">Employment Status</label>
+                                        <select name="employmentStatus" v-model="employmentStatus" id="employmentStatus" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                                            <option value="1">Employed</option>
+                                            <option value="0">Unemployed</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                             <div>
                                 <label for="student_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white capitalize">student id</label>
@@ -149,6 +160,7 @@
                         contactnumber : this.contact_num,
                         course: parseInt(this.course),
                         batch: this.batch,
+                        employmentStatus: this.employmentStatus,
                         student_id: parseInt(this.student_id),
                         email: this.email,
                         password: this.password,

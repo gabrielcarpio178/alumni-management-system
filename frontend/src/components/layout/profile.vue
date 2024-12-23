@@ -8,10 +8,14 @@
                 <span class="sr-only">Close modal</span>
             </div>
             <div class="rounded-lg border bg-white dark:bg-gray-800 dark:border-gray-700 px-4 py-5 shadow-lg">
-                <div class="relative mx-auto w-36 h-36 rounded-full">
-                    <img class="rounded-full  w-36 h-36 object-center" :src="student.profile_pic===null?getThumbnel(student.firstname, student.lastname):`${this.PORT}/uploads/${student.profile_pic}`" alt="" />
+                <div class="relative mx-auto w-28 h-28 rounded-full">
+                    <img class="rounded-full w-28 h-28 object-center" :src="student.profile_pic===null?getThumbnel(student.firstname, student.lastname):`${this.PORT}/uploads/${student.profile_pic}`" alt="" />
                 </div>
-                <h1 class="my-1 text-center text-xl font-bold leading-8 text-white capitalize">{{`${student.firstname} ${student.middlename} ${student.lastname}`}}</h1>
+                <h1 class="my-1 text-center text-md font-bold leading-8 text-white capitalize">{{`${student.firstname} ${student.middlename} ${student.lastname}`}}</h1>
+                <div class="flex flex-row w-full gap-x-2 justify-center">
+                    <div class="capitalize rounded border border-white shadow-lg dark:border-gray-700 nowrap md:text-sm text-xs p-1 dark:text-white" v-if="student.accompleshment.isMasteral===1">Masteral Degree</div>
+                    <div class="capitalize rounded border border-white shadow-lg dark:border-gray-700 nowrap md:text-sm text-xs p-1 dark:text-white" v-if="student.accompleshment.isDoctorate===1">Doctorate Degree</div>
+                </div>
                 <ul class="mt-3 divide-y rounded bg-gray-100 py-2 px-3 text-gray-600 shadow-sm">
                     <li class="flex items-center py-3 text-sm">
                         <span>Email</span>
@@ -34,6 +38,10 @@
                         <span class="ml-auto">{{student.batch}}</span>
                     </li>
                     <li class="flex items-center py-3 text-sm">
+                        <span>Employement Status</span>
+                        <span class="ml-auto">{{student.isEmployed===1?"Employed":"Unemployed"}}</span>
+                    </li>
+                    <li class="flex items-center py-3 text-sm">
                         <span>Status</span>
                         <span class="ml-auto"><span class="rounded-full py-1 px-2 text-xs font-medium" :class="student.status==1?'bg-green-200 text-green-700':'bg-red-200 text-red-700'">{{student.status===0?"Deactivate":"Activate"}}</span></span>
                     </li>
@@ -51,8 +59,10 @@
     export default{
         data(){
             return {
-                student: JSON.parse(localStorage.getItem('student'))
+                student: JSON.parse(localStorage.getItem('student')),
             }
+        },
+        mounted(){
         },
         methods:{
             getThumbnel(firstname, lastname){

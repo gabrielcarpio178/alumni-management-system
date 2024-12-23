@@ -18,6 +18,7 @@ import system_setting from './../components/pages/admin_systemSetting.vue'
 import about from './../components/pages/about.vue'
 import otp from './../components/pages/otppage.vue'
 import alumni from './../components/pages/alumni_list.vue'
+import reports from './../components/pages/admin_reports.vue'
 
 const router = createRouter({
     routes: [
@@ -45,6 +46,14 @@ const router = createRouter({
             path: "/admin-home", 
             name: "admin-home",
             component: admin_home,
+            meta: {
+                requiresAuth: true,
+            }
+        },
+        {
+            path: "/reports", 
+            name: "reports",
+            component: reports,
             meta: {
                 requiresAuth: true,
             }
@@ -164,7 +173,7 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-    const admin_page = ['admin-home', 'course-list', 'alumni-list', 'alumni-gallery', 'event', 'account-setting','admin-jobs','system-setting'];
+    const admin_page = ['admin-home', 'course-list', 'alumni-list', 'alumni-gallery', 'event', 'account-setting','admin-jobs','system-setting', 'reports'];
 
     if(localStorage.getItem('role')==='admin'&&admin_page.includes(to.name)){
         to.meta.requiresAuth = false;

@@ -20,16 +20,20 @@
                                     </div>
                                     <input type="file" ref="file" class="hidden" id="upload_img" @change="onSelect">
                                     <div class="flex flex-col md:w-3/4 w-full gap-y-2">
-                                        <div class="flex flex-row gap-x-2 items-center">
-                                            <h2 class="text-black dark:text-grey text-sm dark:text-gray-400">Accomplishments</h2>
-                                            <button type="button" class="w-10 bg-primary-600 hover:bg-primary-700 rounded" @click="this.removeAddAccomplishmentform">+</button>
-                                        </div>
+                                        
                                         <div class="h-full rounded-lg p-0.5">
-                                             <section class="px-1 py-0.5 dark:text-gray-100 grid md:grid-cols-3 grid-cols-2 gap-2 h-full md:grid-rows-5 text-black">
-                                                
-                                                <div v-if="this.accomplishments_data.length===0" class="capitalize rounded border border-white shadow-lg dark:bg-gray-800 dark:border-gray-700 nowrap md:text-sm text-xs p-1" >No Accomplishments Added</div>
+                                             <section class="px-1 py-0.5 dark:text-gray-100 flex flex-col gap-y-3 h-full text-black">
                                                 <div v-if="this.isloading" class="capitalize nowrap md:text-sm text-xs p-1" >Please wait..</div>
-                                                <div v-for="(data, index) in this.accomplishments_data" :key="index" class="capitalize rounded border border-white shadow-lg dark:bg-gray-800 dark:border-gray-700 nowrap md:text-sm text-xs p-1 cursor-pointer hover:scale-105" @click="selectedAccomplishmentData(data.id, data.accomplishment)">{{data.accomplishment}}</div>
+                                                <h2 class="text-black dark:text-grey text-sm dark:text-gray-400">Accomplishment</h2>
+                                                <div class="flex flex-row w-full gap-x-2">
+                                                    <div class="capitalize rounded border border-white shadow-lg dark:border-gray-700 nowrap md:text-sm text-xs p-1 cursor-pointer hover:scale-105" :class="this.accomplishments_data.isMasteral===1?'dark:bg-green-800 bg-slate-600 text-white':''" @click="this.editAccomplishment('isMasteral', this.accomplishments_data.isMasteral===1?0:1)">Masteral Degree</div>
+                                                    <div class="capitalize rounded border border-white shadow-lg dark:border-gray-700 nowrap md:text-sm text-xs p-1 cursor-pointer hover:scale-105" :class="this.accomplishments_data.isDoctorate===1?'dark:bg-green-800 bg-slate-600 text-white':''" @click="this.editAccomplishment('isDoctorate', this.accomplishments_data.isDoctorate===1?0:1)">Doctorate Degree</div>
+                                                </div>
+                                                <h2 class="text-black dark:text-grey text-sm dark:text-gray-400">Employement Status</h2>
+                                                <div class="flex flex-row w-full gap-x-2">
+                                                    <div class="capitalize rounded border border-white shadow-lg dark:border-gray-700 nowrap md:text-sm text-xs p-1" :class="student.isEmployed===1?'dark:bg-green-800 bg-slate-600 text-white':'cursor-pointer hover:scale-105'" @click="this.changeEmployement(1)">Employed</div>
+                                                    <div class="capitalize rounded border border-white shadow-lg dark:border-gray-700 nowrap md:text-sm text-xs p-1" :class="student.isEmployed!==1?'dark:bg-green-800 bg-slate-600 text-white':'cursor-pointer hover:scale-105'" @click="this.changeEmployement(0)">Unemployed</div>
+                                                </div>
                                              </section>
                                         </div>
                                     </div>
@@ -124,9 +128,6 @@
                 </div>
             </section>
         </div>
-        <AddformAccomplishment v-if="this.isAccomplishmentShow" @removeAddAccomplishmentform="removeAddAccomplishmentform"
-        @isloder="isloder" @getAccomplishment="getAccomplishment" class="animate__animated animate__bounceInDown"/>
-        <EditformAccomplishment v-if="this.isEditAccomplishmentShow" @removeEditAccomplishmentform="removeEditAccomplishmentform" @getAccomplishment="getAccomplishment" class="animate__animated animate__bounceInDown" v-bind:selectedAccomplishment="selectedAccomplishment" @isloder="isloder"/>
     </div>    
 </template>
 
@@ -136,15 +137,11 @@
     import axios from 'axios';
     import Loader from '../layout/loader.vue'
     import Swal from 'sweetalert2';
-    import AddformAccomplishment from './addFormAccomplishment.vue';
-    import EditformAccomplishment from './editFormAccomplishment.vue';
     
     export default{
         components: { 
             Topbar,
             Loader,
-            AddformAccomplishment,
-            EditformAccomplishment
         },
         data(){
             return {
@@ -275,6 +272,34 @@
             isloder(){
                this.isLoader = this.isLoader != 'loader-hide'?'loader-hide':'loader-display';
             },
+
+            async changeEmployement(status_id){
+                if(JSON.parse(localStorage.getItem('student')).isEmployed!==status_id){
+                    this.isLoader = 'loader-display';
+                    const student_id = JSON.parse(localStorage.getItem('student')).id;
+                    const isEmployed = JSON.parse(localStorage.getItem('student')).isEmployed===1?0:1;
+                    const token = localStorage.getItem('token');
+                    var res = await axios.put(`${this.PORT}/auth/student/employment`,
+                        {
+                            isEmployed, student_id
+                        },
+                        {
+                            headers:{
+                                'Content-type':'application/x-www-form-urlencoded',
+                                "authorization" : `bearer ${token}`,
+                            }
+                        }
+                    )
+                    if(res.data.message==="update success"){
+                        this.isLoader = 'loader-hide'
+                        var recentData = JSON.parse(localStorage.getItem('student'));
+                        recentData.isEmployed = isEmployed;
+                        this.student.isEmployed =isEmployed;
+                        localStorage.setItem('student', JSON.stringify(recentData));
+                    }
+                }
+                
+            },
             
             async getAccomplishment(){
                 this.isloading = true;
@@ -287,26 +312,45 @@
                             "authorization" : `bearer ${token}`,
                         }
                     })
-                    this.accomplishments_data = res.data.accomplishments;
+                    this.accomplishments_data = res.data.accomplishments[0];
                 } catch (error) {
                     console.log(error)
                 }finally{
                     this.isloading = false;
                 }
             },
-
-            removeEditAccomplishmentform(){
-                this.isEditAccomplishmentShow = !this.isEditAccomplishmentShow
-            },
-
-            selectedAccomplishmentData(id, accomplishment){
-                this.selectedAccomplishment.id = id
-                this.selectedAccomplishment.accomplishment = accomplishment
-                this.isEditAccomplishmentShow = !this.isEditAccomplishmentShow;
+            async editAccomplishment(columnName, status){
+                const student_id = JSON.parse(localStorage.getItem('student')).id;
+                const token = localStorage.getItem('token');
+                this.isLoader = 'loader-display';
+                var res = await axios.put(`${this.PORT}/auth/student/editaccomplestment`,
+                    {
+                        student_id, columnName, status
+                    },
+                    {
+                        headers:{
+                            'Content-type':'application/x-www-form-urlencoded',
+                            "authorization" : `bearer ${token}`,
+                        }
+                    }
+                )
+                var {columnName, message, status} = res.data;
+                if(message==="update success"){
+                    var studentData = JSON.parse(localStorage.getItem('student'));
+                    this.isLoader = 'loader-hide'
+                    if(columnName==="isMasteral"){
+                        this.accomplishments_data.isMasteral = parseInt(status);
+                        studentData.accompleshment.isMasteral = parseInt(status)
+                    }
+                    if(columnName==="isDoctorate"){
+                        this.accomplishments_data.isDoctorate = parseInt(status);
+                        studentData.accompleshment.isDoctorate = parseInt(status)
+                    }
+                    localStorage.setItem('student', JSON.stringify(studentData));
+                }
+                
             }
-
-
-
         }
+        
     }    
 </script>    

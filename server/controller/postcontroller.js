@@ -15,6 +15,8 @@ export const login = async (req, res) => {
             var isMatch = await bcrypt.compare(password, student_rows[0].password);
             if(isMatch){
                 if(student_rows[0].status===1){
+                    const [accompleshment] = await db.query(`SELECT isDoctorate, isMasteral FROM accomplishment WHERE student_id = ${student_rows[0].id}`);
+                    student_rows[0].accompleshment = accompleshment[0];
                     const token = jwt.sign({ id: student_rows[0].id }, JWT_KEY, { expiresIn: '24h' });
                     return res.status(200).json({student: student_rows[0] ,token, role: "student" });
                 }
@@ -41,7 +43,7 @@ const generateOtp = () => {
 }
 
 export const register = async (req, res)=>{
-    const {lastname, firstname, middlename, gender, birthday, course, contactnumber, batch, email, student_id, password} = req.body;
+    const {lastname, firstname, middlename, gender, birthday, course, contactnumber, batch, employmentStatus ,email, student_id, password} = req.body;
     const expire_time = moment().add(30, 'minutes').format();
     const otp = generateOtp().toString();
     const hashOtp = await bcrypt.hash(otp, 10)
@@ -64,7 +66,7 @@ export const register = async (req, res)=>{
                 console.log(e)
             })
 
-            return res.status(201).json({message: "user created successfully", role: 'verification', request_data: {lastname, firstname, middlename, gender, birthday, course, contactnumber: "0"+contactnumber.toString(), batch, email, student_id, password, expire_time, hashOtp}})
+            return res.status(201).json({message: "user created successfully", role: 'verification', request_data: {lastname, firstname, middlename, gender, birthday, course, contactnumber: "0"+contactnumber.toString(), batch, employmentStatus, email, student_id, password, expire_time, hashOtp}})
         } catch(err) {
             return res.status(500).json(err.message)
         }
@@ -87,13 +89,14 @@ export const resendOTP = async (req, res) => {
 }
 
 export const verification_OTP = async (req, res)=>{
-    const {lastname, firstname, middlename, gender, birthday, course, contactnumber, batch, email, student_id, password, hashOtp, otp} = req.body;
+    
+    const {lastname, firstname, middlename, gender, birthday, course, contactnumber, batch, employmentStatus,email, student_id, password, hashOtp, otp} = req.body;
     var isMatch = await bcrypt.compare(otp, hashOtp);
     if(isMatch){
         try {
             const db = await connectToDatabase();
             const hashPassword = await bcrypt.hash(password, 10)
-            await db.query(`INSERT INTO students(firstname, middlename, lastname, gender, birthday, course, batch, contact_num, student_id, email, password) VALUES ('${firstname}','${middlename}','${lastname}','${gender}','${birthday}','${course}', '${batch}', '${contactnumber}','${student_id}', '${email}','${hashPassword}')`);
+            await db.query(`INSERT INTO students(firstname, middlename, lastname, gender, birthday,course, batch, isEmployed, contact_num, student_id, email, password) VALUES ('${firstname}','${middlename}','${lastname}','${gender}','${birthday}','${course}', '${batch}', '${employmentStatus}','${contactnumber}','${student_id}', '${email}','${hashPassword}')`);
             return res.status(200).json({message: 'success'})
         } catch (error) {
             return res.status(500).json({message: 'server error'})
@@ -102,16 +105,6 @@ export const verification_OTP = async (req, res)=>{
     return res.status(200).json({message: 'invalid otp'})
 }
 
-export const addAccomplishment = async (req, res)=>{
-    const {student_id, accomplishment} = req.body;
-    try {
-            const db = await connectToDatabase();
-            await db.query(`INSERT INTO accomplishment(student_id, accomplishment) VALUES ('${student_id}','${accomplishment}')`);
-            return res.status(200).json({message: 'success'})
-        } catch (error) {
-            return res.status(500).json({message: 'server error'})
-        }
-}
 
 export const add_course = async (req, res)=>{
     const course = req.body.course;
